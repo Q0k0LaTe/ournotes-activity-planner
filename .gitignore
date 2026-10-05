@@ -1,0 +1,24 @@
+.venv/
+.DS_Store
+.vercel/
+work/
+node_modules/
+__pycache__/
+*.pyc
+*.sqlite3
+*.sqlite3-*
+.env
+.env.*
+!.env.example
+workbench/runtime/
+workbench/web/card-images/
+workbench/local-state/
+
+# Generated browser artifacts
+browser/public/
+browser/dist/
+browser/index.html
+browser/generated-app.js
+browser/style.css
+browser/event-math.js
+browser/event-extra.js

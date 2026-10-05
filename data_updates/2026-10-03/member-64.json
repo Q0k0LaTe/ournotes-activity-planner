@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "update_id": "jp-2026-10-03-member-64",
+  "base_data_commit": "0f8644dd85b7c3d21794fb3f718e48773cd1cc60",
+  "source_repository": "StarMoe-org/moenotes-masterdata",
+  "source_commit": "c2b44fcb0975a252358e13efa2124094851e188b",
+  "source_path": "jp",
+  "member_ids": [
+    64
+  ],
+  "tables": {
+    "MasterMemberCard": {
+      "source_sha256": "ba9e91ed3a5db85a7291be7c8439f7a1f9ff2df5a896910b2503ac612fe8c26b",
+      "source_blob_sha": "4f55ba437e6c8f522e403528a7d36b71229db572",
+      "rows": [
+        {
+          "_id": 64,
+          "_assetID": 64,
+          "_nameTextID": "Character_Name_Miku",
+          "_subtitleTextID": "MemberSubtitle_64",
+          "_characterID": 22,
+          "_rarity": 20,
+          "_cardType": 5,
+          "_bestMusicTagIDs": [
+            5
+          ],
+          "_performancePowerMax": 30179,
+          "_technicPowerMax": 23214,
+          "_visualPowerMax": 23214,
+          "_memberCardLevelGroup": 4,
+          "_memberCardAwakeGroup": 1,
+          "_memberCardAwakeResourceGroup": 20,
+          "_memberCardRankGroup": 1,
+          "_rankUpItemID": 10000064,
+          "_leaderSkillID": 59,
+          "_liveSkillID": 8,
+          "_gekisouSkillID": 22,
+          "_liveSkillLevelResourceGroup": 4,
+          "_gekisouSkillLevelResourceGroup": 8,
+          "_gachaVoiceTextId": "MemberGachaVoice_64",
+          "_gachaVoiceSoundId": 3202202000001,
+          "_startAt": "2026-10-04 0:00:00"
+        }
+      ]
+    },
+    "MasterLeaderSkill": {
+      "source_sha256": "74513374fd574022ee9dfa92701448dcf50a175a6550c27c7406e772fab12239",
+      "source_blob_sha": "bcc20501fc617e09cf017338fea284fe659a77a1",
+      "rows": [
+        {
+          "_id": 59,
+          "_nameTextID": "Leader_Skill_Name_59",
+          "_descriptionTextFormatID": "Leader_Skill_Name_Description_59",
+          "_skillIconID": 16
+        }
+      ]
+    },
+    "MasterLeaderSkillEffect": {
+      "source_sha256": "a0fc78eea273a66130ba8506edc7215df4972e7d54a6e3ac388c533457ab3ec6",
+      "source_blob_sha": "1c3729afcbdd471b5d133d0fe4d46a4bd80d123c",
+      "rows": [
+        {
+          "_id": 341,
+          "_leaderSkillID": 59,
+          "_level": 1,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            7
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 2500,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 342,
+          "_leaderSkillID": 59,
+          "_level": 2,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            7
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 3500,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 343,
+          "_leaderSkillID": 59,
+          "_level": 3,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            7
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 4500,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 344,
+          "_leaderSkillID": 59,
+          "_level": 4,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            7
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 5500,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 345,
+          "_leaderSkillID": 59,
+          "_level": 5,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            7
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 8500,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 346,
+          "_leaderSkillID": 59,
+          "_level": 1,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            12
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 4000,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 347,
+          "_leaderSkillID": 59,
+          "_level": 2,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            12
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 4000,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 348,
+          "_leaderSkillID": 59,
+          "_level": 3,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            12
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 4000,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 349,
+          "_leaderSkillID": 59,
+          "_level": 4,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            12
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 4000,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        },
+        {
+          "_id": 350,
+          "_leaderSkillID": 59,
+          "_level": 5,
+          "_skillConditionGroup": 0,
+          "_skillTargetIDs": [
+            12
+          ],
+          "_skillEffectType": 1003,
+          "_effectValue": 4000,
+          "_skillCumulativeConditionID": 0,
+          "_effectExecuteLimitCount": 0,
+          "_effectExecuteLimitResetConditionGroup": 0,
+          "_icon": ""
+        }
+      ]
+    },
+    "MasterText": {
+      "source_sha256": "da3facc06f5bc4216211c863ad1138091872d5743b9093d1cef7635ebbfa1240",
+      "source_blob_sha": "b68483e3d2633e1700ac224a54f1d8affd3bab27",
+      "rows": [
+        {
+          "_id": "Leader_Skill_Name_Description_59",
+          "_japanese": "一家Dumb Rock!メンバーのパフォーマンスが<color=#66FF8C>{effects[0].value/100:F1}%UP</color> さらに紫苑のメンバーはパフォーマンスが{effects[1].value/100:F1}%UP",
+          "_english": "",
+          "_traditionalChinese": "",
+          "_simplifiedChinese": "",
+          "_korean": ""
+        },
+        {
+          "_id": "Leader_Skill_Name_59",
+          "_japanese": "一家Dumb Rock!&紫苑パフォーマンスUP",
+          "_english": "",
+          "_traditionalChinese": "",
+          "_simplifiedChinese": "",
+          "_korean": ""
+        },
+        {
+          "_id": "MemberSubtitle_64",
+          "_japanese": "Happy Birthday 26-27",
+          "_english": "",
+          "_traditionalChinese": "",
+          "_simplifiedChinese": "",
+          "_korean": ""
+        }
+      ]
+    }
+  },
+  "thumbnail": {
+    "source_url": "https://assets.bdon.moe/jp/ja/MemberCard/64/member_thumbnail/member_thumbnail.webp",
+    "sha256": "e465337510e90962229a24fe03c23f9b55330073bb70e4e70d3bab0d313a52e1",
+    "file": "members-64.webp"
+  }
+}
