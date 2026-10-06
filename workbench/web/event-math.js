@@ -11,12 +11,44 @@
     if (!Number.isFinite(n) || n <= 0) throw new Error(label + '需填写大于 0 的数字。');
     return n;
   }
+  // Event #1, 2026-10-01 normalized reward snapshot. The source-model checks
+  // in test_event_rewards.py verify these rank bases and consumption rates.
+  const rewardBases = {
+    normal: {D:[15,18,3], C:[25,30,4], B:[35,42,5], A:[50,60,6], S:[75,90,8], SS:[100,120,10]},
+    challenge: {D:[1500,1450], C:[2000,2650], B:[2550,3400], A:[3250,3750], S:[3900,4450], SS:[5000,4950]},
+  };
+  function reward(event, mode, rank, consumed, bonuses) {
+    if (event?.id !== 1) throw new Error('当前收益表仅支持活动 #1。');
+    if (mode !== 'normal' && mode !== 'challenge') throw new Error('请选择普通或挑战演出。');
+    const challenge = mode === 'challenge';
+    const base = rewardBases[mode][rank];
+    const allowed = challenge ? [200,400,800,1600] : [1,2,3,4,5,6,7,8,9,10];
+    const rate = allowed.includes(consumed) ? (challenge ? consumed / 200 : consumed * 5) : null;
+    if (!base || !rate) throw new Error('所选评级或消耗档位不在活动 #1 的收益表中。');
+    const ptBonus = integer(bonuses?.event_pt, '活动 PT 加成');
+    const shopBonus = integer(bonuses?.shop_pt, '活动徽章加成');
+    const amount = factors => {
+      const product = factors.reduce((value, factor) => value * factor, 1);
+      if (!Number.isSafeInteger(product) || product > 2147483647)
+        throw new Error('收益计算超出客户端参考模型的整数范围。');
+      return Math.floor(product / 10000);
+    };
+    return {
+      event_pt: amount(challenge
+        ? [base[0], rate, 10000 + ptBonus]
+        : [10000 + ptBonus, rate, base[0]]),
+      shop_pt: amount([base[1], 10000 + shopBonus, rate]),
+      cp: challenge ? 0 : base[2] * rate,
+    };
+  }
   function plan(raw) {
     const current = integer(raw.current, '当前活动 PT');
     const target = integer(raw.target, '目标活动 PT');
     const currentShop = integer(raw.currentShop || 0, '当前活动徽章');
     const shopTarget = raw.shopTarget === '' || raw.shopTarget == null ? null : integer(raw.shopTarget, '目标活动徽章');
     const cpStart = integer(raw.cpStart, '当前 CP');
+    if (raw.normalPt === '' || raw.normalCp === '' || raw.challengePt === '')
+      throw new Error('请填写普通和挑战的每局收益，或先用已配队伍按评级估算。');
     const normalPt = integer(raw.normalPt, '普通每局 PT');
     const normalCp = integer(raw.normalCp, '普通每局 CP');
     const normalShop = integer(raw.normalShop || 0, '普通每局活动徽章');
@@ -91,6 +123,6 @@
       minutes: neededNormal * normalMinutes + neededChallenge * challengeMinutes,
       daily, dailyLimit, feasible: dailyLimit == null || daily.every(row => row.normal <= dailyLimit)};
   }
-  root.EventMath = {plan};
-  if (typeof module !== 'undefined' && module.exports) module.exports = {plan};
+  root.EventMath = {plan, reward};
+  if (typeof module !== 'undefined' && module.exports) module.exports = {plan, reward};
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {plan} = require('../workbench/web/event-math.js');
+const {plan, reward} = require('../workbench/web/event-math.js');
+const event = {id:1};
 
 const base = {
   now:'2026-10-05T12:00:00', endAt:'2026-10-07T23:59:00', current:0,
@@ -48,4 +49,26 @@ test('meets both cumulative PT and event badge targets with conserved CP', () =>
   assert.equal(result.totalShop, 120);
   assert.equal(result.daily.at(-1).shop, result.totalShop);
   assert.equal(result.cpRemaining, 100);
+});
+
+test('uses exact event reward bases for song-free team planning', () => {
+  const bases = {normal:{D:[15,18,3],C:[25,30,4],B:[35,42,5],A:[50,60,6],S:[75,90,8],SS:[100,120,10]},
+    challenge:{D:[1500,1450],C:[2000,2650],B:[2550,3400],A:[3250,3750],S:[3900,4450],SS:[5000,4950]}};
+  for (const [mode, ranks] of Object.entries(bases)) {
+    for (const [rank, [pt, shop, cp]] of Object.entries(ranks)) {
+      for (const consumed of mode === 'normal' ? [1,4,10] : [200,400,800,1600]) {
+        const factor = mode === 'normal' ? consumed * 5 : consumed / 200;
+        const actual = reward(event, mode, rank, consumed, {event_pt:10800,shop_pt:14000});
+        assert.deepEqual(actual, {event_pt:Math.floor(pt*factor*20800/10000),
+          shop_pt:Math.floor(shop*factor*24000/10000), cp:mode === 'normal' ? cp*factor : 0});
+      }
+    }
+  }
+  assert.deepEqual(reward(event,'normal','C',4,{event_pt:7000,shop_pt:9000}),
+    {event_pt:850,shop_pt:1140,cp:80});
+  assert.throws(() => reward(event,'challenge','B',600,{event_pt:0,shop_pt:0}), /消耗档位/);
+});
+
+test('requires explicit per-live gains before building a schedule', () => {
+  assert.throws(() => plan({...base, normalPt:'',normalCp:'',challengePt:''}), /每局收益/);
 });

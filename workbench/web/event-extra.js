@@ -24,7 +24,7 @@ window.EventPages = (() => {
     planNormalShop:'normalShop', planNormalBoost:'normalBoost', planNormalMinutes:'normalMinutes',
     planChallengePt:'challengePt', planChallengeCost:'challengeCost',
     planChallengeShop:'challengeShop', planChallengeMinutes:'challengeMinutes'};
-  let loadedProfile = null, lastSimulation = null, lastPlan = null, planSource = 'manual', planModelSignature = null;
+  let loadedProfile = null, lastSimulation = null, lastPlan = null, planSource = 'manual', planBasis = null, planModelSignature = null;
   let simulations = [], loadedSongsProfile = null, simulationsProfile = null;
   let optimum = null, optimumProfile = null, loadedOptimumProfile = null, optimizingSong = false, songJobId = null;
   let modelProfile = null;
@@ -59,27 +59,39 @@ window.EventPages = (() => {
     const migratedTime = !!saved && draft.endAt === dateTimeLocal(catalog.event.end_at);
     if (migratedTime) draft.endAt = defaults().endAt;
     writeFields(draft);
-    planSource = saved?.source || 'manual'; modelProfile = saved?.modelProfile || null;
+    planSource = saved?.source || 'manual'; planBasis = saved?.basis || null; modelProfile = saved?.modelProfile || null;
     planModelSignature = saved?.modelSignature || null;
     lastPlan = null; $('planOutput').hidden = true;
+    $('planPreviewBoost').value = draft.normalBoost;
+    $('planPreviewCost').value = draft.challengeCost;
     sourceLabel();
     if (migratedTime) saveDraft();
   }
   function sourceLabel() {
     const old = planSource === 'model' && (modelProfile !== JSON.stringify(state.profile) || planModelSignature !== window.EventHost.signature);
-    $('planSource').textContent = old ? '模型值已过期，请重新计算' : planSource === 'model' ? '卡组模型估算 · 活动 #1' : '手动实测 / 输入';
+    $('planSource').textContent = old ? '模型值已过期，请重新计算' : planSource === 'model'
+      ? planBasis === 'rank' ? '配队加成＋假设评级 · 活动 #1' : '单曲模型估算 · 活动 #1'
+      : '手动实测 / 输入';
     $('planSource').className = 'badge' + (old ? ' warning-badge' : '');
   }
   function saveDraft() {
-    const value = {fields:fields(), source:planSource, modelProfile, modelSignature:planModelSignature};
+    const value = {fields:fields(), source:planSource, basis:planBasis, modelProfile, modelSignature:planModelSignature};
     try { localStorage.setItem(key(), JSON.stringify(value)); }
     catch (error) { $('planError').hidden = false; $('planError').textContent = '无法保存活动输入：' + error.message; }
   }
-  function renderTeams() {
+  function renderTeams(resetPlanTeams = false) {
     const teams = result?.teams || [];
     $('simTeam').innerHTML = teams.map((team, index) => `<option value="${index}">队伍 ${index+1} · ${esc(team.reason)} · ${fmt(team.power)} 综合力</option>`).join('');
     $('songNoTeam').hidden = teams.length > 0;
     $('runSong').disabled = teams.length === 0;
+    const best = teams.reduce((index, team, i) => team.bonuses_10000.event_pt > (teams[index]?.bonuses_10000.event_pt ?? -1) ? i : index, 0);
+    for (const id of ['planNormalTeam', 'planChallengeTeam']) {
+      const select = $(id), previous = select.value;
+      select.innerHTML = teams.map((team, index) => `<option value="${index}">队伍 ${index+1} · PT +${fmt(team.bonuses_10000.event_pt/100)}% · 徽章 +${fmt(team.bonuses_10000.shop_pt/100)}%</option>`).join('');
+      if (teams.length) select.value = !resetPlanTeams && previous !== '' && Number(previous) < teams.length ? previous : String(best);
+    }
+    $('planNoTeams').hidden = teams.length > 0;
+    $('estimatePlan').disabled = teams.length === 0;
   }
   function renderSongs() {
     if (!catalog?.songs) return;
@@ -228,9 +240,32 @@ window.EventPages = (() => {
       $('planChallengeShop').value = value.per_live.shop_pt;
       $('planChallengeCost').value = value.consumed;
     }
-    planSource = 'model'; modelProfile = JSON.stringify(state.profile); planModelSignature = window.EventHost.signature;
+    planSource = 'model'; planBasis = 'song'; modelProfile = JSON.stringify(state.profile); planModelSignature = window.EventHost.signature;
     sourceLabel(); saveDraft(); $('planOutput').hidden = true; lastPlan = null;
     tab('eventPlan'); notice('已将单曲估算填入活动拉表。可以直接改为游戏里的实际结算值。');
+  }
+  function estimateFromTeams() {
+    if (!result?.teams?.length) throw new Error('请先计算配队结果，或在下方填写实测单场收益。');
+    const normal = result.teams[Number($('planNormalTeam').value)];
+    const challenge = result.teams[Number($('planChallengeTeam').value)];
+    if (!normal || !challenge) throw new Error('请选择普通和挑战演出的队伍。');
+    const skipped = $('planNormalMethod').value === 'skip';
+    const normalRank = skipped ? 'C' : $('planNormalRank').value;
+    const challengeRank = $('planChallengeRank').value;
+    const boost = Number($('planPreviewBoost').value), cost = Number($('planPreviewCost').value);
+    const normalGain = window.EventMath.reward(catalog.event, 'normal', normalRank, boost, normal.bonuses_10000);
+    const challengeGain = window.EventMath.reward(catalog.event, 'challenge', challengeRank, cost, challenge.bonuses_10000);
+    $('planNormalPt').value = normalGain.event_pt;
+    $('planNormalCp').value = normalGain.cp;
+    $('planNormalShop').value = normalGain.shop_pt;
+    $('planNormalBoost').value = boost;
+    $('planChallengePt').value = challengeGain.event_pt;
+    $('planChallengeShop').value = challengeGain.shop_pt;
+    $('planChallengeCost').value = cost;
+    planSource = 'model'; planBasis = 'rank'; modelProfile = JSON.stringify(state.profile);
+    planModelSignature = window.EventHost.signature;
+    sourceLabel(); saveDraft(); calculate();
+    if (lastPlan) notice(`已按普通 ${normalRank}${skipped ? '（跳过）' : ''}、挑战 ${challengeRank} 的假设生成拉表；请用实机结算校正单场收益。`);
   }
   function renderPlan(value) {
     lastPlan = value;
@@ -261,8 +296,14 @@ window.EventPages = (() => {
   function init() {
     sync();
     $('resultToSong').addEventListener('click', () => tab('song'));
+    $('resultToPlan').addEventListener('click', () => { tab('eventPlan'); $('teamRewardPanel').scrollIntoView({behavior:'smooth',block:'start'}); });
     $('songToTeam').addEventListener('click', () => tab('plan'));
     $('planToSong').addEventListener('click', () => tab('song'));
+    $('planNormalMethod').addEventListener('change', () => {
+      const skipped = $('planNormalMethod').value === 'skip';
+      $('planNormalRank').disabled = skipped;
+      $('planNormalRank').value = skipped ? 'C' : 'B';
+    });
     $('simMode').addEventListener('change', () => {
       $('simObjective').value = $('simMode').value === 'challenge' ? 'score' : 'event_pt';
       renderSongs(); renderOptimum();
@@ -273,6 +314,7 @@ window.EventPages = (() => {
     on('runOptimizeSong', 'click', optimizeSong);
     on('cancelOptimizeSong', 'click', async () => { if (songJobId) await post(`/api/jobs/${songJobId}/cancel`, {}); });
     on('calculatePlan', 'click', calculate);
+    on('estimatePlan', 'click', estimateFromTeams);
     on('exportSchedule', 'click', exportCsv);
     $('songHistoryRows').addEventListener('click', event => {
       const button = event.target.closest('[data-use-song]');
@@ -281,7 +323,7 @@ window.EventPages = (() => {
     $('clearSongHistory').addEventListener('click', () => { simulations = []; saveSimulations(); renderSongTable(); });
     const draftChanged = id => {
       if (id.startsWith('planNormal') || id.startsWith('planChallenge')) {
-        planSource = 'manual'; modelProfile = null; planModelSignature = null; sourceLabel();
+        planSource = 'manual'; planBasis = null; modelProfile = null; planModelSignature = null; sourceLabel();
       }
       $('planOutput').hidden = true; lastPlan = null; saveDraft();
     };
@@ -303,6 +345,6 @@ window.EventPages = (() => {
       simulations = []; simulationsProfile = JSON.stringify(state.profile);
       $('songResult').hidden = true; renderSongTable();
     } } }
-  function onResult() { sync(); if (catalog) renderTeams(); }
+  function onResult() { sync(); if (catalog) renderTeams(true); }
   return {init, onTab, onStateChanged, onResult};
 })();

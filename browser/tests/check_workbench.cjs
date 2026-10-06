@@ -31,6 +31,35 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   assert.equal(first.result.teams.length,15);assert.equal(first.result.search.chart_count,0);
   assert.equal(new Set(first.result.teams.map(t=>JSON.stringify([t.member_ids,[...t.snap_ids].sort((a,b)=>a-b)]))).size,15);
   reports.push('15 distinct skill-aware teams without songs');console.log(reports.at(-1));
+  await page.locator('#resultToPlan').click();
+  assert.equal(await page.locator('#eventPlan').isVisible(),true);
+  assert.equal(await page.locator('#planNormalTeam option').count(),15);
+  const future=await page.evaluate(()=>{const d=new Date(Date.now()+3*86400000),pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T23:59`;});
+  await page.locator('#planEnd').fill(future);
+  await page.locator('#estimatePlan').click();
+  assert.equal(await page.locator('#planOutput').isVisible(),true,await page.locator('#planError').textContent());
+  const expected = await page.evaluate(() => {
+    const teams = window.EventHost.result.teams;
+    const normal = teams[Number(document.getElementById('planNormalTeam').value)];
+    const challenge = teams[Number(document.getElementById('planChallengeTeam').value)];
+    return {normal:EventMath.reward(window.EventHost.catalog.event,'normal','B',4,normal.bonuses_10000),
+      challenge:EventMath.reward(window.EventHost.catalog.event,'challenge','B',200,challenge.bonuses_10000)};
+  });
+  assert.equal(Number(await page.locator('#planNormalPt').inputValue()),expected.normal.event_pt);
+  assert.equal(Number(await page.locator('#planNormalCp').inputValue()),expected.normal.cp);
+  assert.equal(Number(await page.locator('#planChallengePt').inputValue()),expected.challenge.event_pt);
+  const scheduleDownload=page.waitForEvent('download');await page.locator('#exportSchedule').click();
+  const schedule=await scheduleDownload;assert.match(schedule.suggestedFilename(),/活动拉表\.csv/);
+  await page.setViewportSize({width:390,height:1000});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.screenshot({path:path.join(DEST,'workbench-schedule-390.png'),fullPage:true});
+  await page.setViewportSize({width:1440,height:1050});
+  await page.locator('#planNormalMethod').selectOption('skip');await page.locator('#estimatePlan').click();
+  assert.equal(await page.locator('#planNormalRank').inputValue(),'C');
+  assert.equal(await page.locator('#planNormalRank').isDisabled(),true);
+  assert.ok(Number(await page.locator('#planNormalPt').inputValue())<expected.normal.event_pt);
+  reports.push('song-free team reward preview, schedule and CSV export');console.log(reports.at(-1));
+  await page.locator('[data-tab="output"]').click();
   await page.locator('[data-copy="0"]').click();assert.ok((await page.locator('#copyText').inputValue()).includes('https://bdon.moe/tools/chart-data'));await page.locator('#closeCopy').click();
   await page.locator('[data-detail="0"]').click();const download=page.waitForEvent('download');await page.locator('#detailImage').click();await(await download).saveAs(path.join(DEST,'team.png'));await page.locator('[data-close="teamDetails"]').click();
   await page.screenshot({path:path.join(DEST,'workbench-results.png'),fullPage:true});
