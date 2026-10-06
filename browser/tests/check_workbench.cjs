@@ -43,11 +43,18 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   assert.deepEqual(projected.archives.profiles.find(profile=>profile.id===sampleId).input.profile,sampleBefore.profile);
   await page.locator('#profileSelect').selectOption(sampleId);
   reports.push('hypothetical max-upgrade profile keeps the actual inventory unchanged');
+  await page.locator('[data-tab="growth"]').click();
+  await page.locator('[data-facility="405"]').fill('0');
   await page.locator('[data-tab="plan"]').click();await page.screenshot({path:path.join(DEST,'workbench-plan.png'),fullPage:true});
+  await page.locator('#checkGrowth').click();
+  await page.waitForFunction(()=>document.getElementById('growthIssues').textContent.trim());
+  assert.ok((await page.locator('#growthIssues').textContent()).includes('所需实际养成检查通过'),
+    await page.locator('#growthIssues').textContent());
   await page.locator('#count').selectOption('15');
   await page.locator('#calculate').click();await complete(page);const first=await exported(page,'workbench-first');
   assert.equal(first.result.teams.length,15);assert.equal(first.result.search.chart_count,0);
   assert.equal(new Set(first.result.teams.map(t=>JSON.stringify([t.member_ids,[...t.snap_ids].sort((a,b)=>a-b)]))).size,15);
+  reports.push('unrelated level-0 facility does not block a valid card-pool search');
   reports.push('15 distinct skill-aware teams without songs');console.log(reports.at(-1));
   await page.locator('#resultToPlan').click();
   assert.equal(await page.locator('#eventPlan').isVisible(),true);

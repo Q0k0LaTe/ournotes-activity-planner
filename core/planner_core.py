@@ -452,7 +452,10 @@ class PowerModel:
             facility = data.index["MasterBandItem"][identifier]
             max_level = max(r["_level"] for r in tables["MasterBandItemLevel"] if r["_bandItemId"] == identifier)
             integer(facilities.get(identifier, {}).get("level"), f"道具「{data.text[facility['_nameTextId']]}」的等级", 1, max_level)
-        calculation_profile = {**profile, "facilities": [r for r in facilities.values() if r.get("level") is not None]}
+        # The detailed calculator validates every supplied facility row, even
+        # when its effect cannot apply to this team. Only pass the facilities
+        # whose levels were checked above for the selected members.
+        calculation_profile = {**profile, "facilities": [facilities[i] for i in sorted(required)]}
         rates, _ = dp._band_rates(tables, calculation_profile, list(self.cards.values()), list(self.chars.values()))
         self.band = dict(zip(mids, rates))
         self.flat, self.rank = {}, {}
