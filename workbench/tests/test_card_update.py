@@ -18,6 +18,15 @@ class CardUpdateTests(unittest.TestCase):
     def test_birthday_member_is_in_catalog_and_usable_as_leader(self):
         catalog = teams.workbench_catalog(self.data)
         self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (64, 64))
+        for kind in ('members', 'snaps'):
+            cards = catalog[kind]
+            self.assertEqual({c['id'] for c in cards}, set(range(1, 65)))
+            self.assertEqual(sum(c['rarity'] == 2 for c in cards), 25)
+            self.assertEqual(sum(c['rarity'] == 3 for c in cards), 26)
+        for identifier, title in ((27, 'きらめくステージ'), (28, 'おもしれー音'),
+                                  (30, '一途な律動'), (33, '盤石の低音')):
+            card = next(c for c in catalog['members'] if c['id'] == identifier)
+            self.assertEqual((card['rarity'], card['title']), (3, title))
         card = next(c for c in catalog['members'] if c['id'] == 64)
         self.assertEqual((card['character_id'], card['rarity'], card['type'], card['caps']),
                          (22, 20, 5, [50, 60, 70, 80, 90]))

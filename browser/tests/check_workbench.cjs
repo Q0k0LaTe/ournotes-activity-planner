@@ -17,6 +17,20 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  try{
   await page.goto(BASE);await ready(page);assert.equal(await page.locator('#ownedCount').textContent(),'0 + 0');
+  await page.locator('[data-tab="inventory"]').click();
+  for(const kind of ['members','snaps']){
+    await page.locator(`[data-kind-tab="${kind}"]`).click();
+    assert.equal(await page.locator('#cardStatus').inputValue(),'all');
+    assert.equal(await page.locator('#catalogCount').textContent(),'显示 64 / 64 张卡牌');
+    for(const [rarity,count] of [['2',25],['3',26]]){
+      await page.locator('#cardRarity').selectOption(rarity);
+      assert.equal(await page.locator('#cardCatalog article').count(),count);
+      if(kind==='members'&&rarity==='3')for(const id of [27,28,30,33])
+        assert.equal(await page.locator(`#cardCatalog [data-edit="members"][data-id="${id}"]`).count(),1);
+    }
+    await page.locator('#clearFilters').click();
+  }
+  reports.push('wiki R/SR cards are visible in both complete catalogues');
   assert.equal(await page.locator('#simSong,#simDifficulty').count(),2);
   const originalProfile=await page.locator('#profileSelect').inputValue();
   await page.locator('[data-tab="eventPlan"]').click();await page.locator('#planNormalPt').fill('123');
@@ -24,6 +38,13 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.locator('[data-tab="eventPlan"]').click();assert.equal(await page.locator('#planNormalPt').inputValue(),'');
   await page.locator('#profileSelect').selectOption(originalProfile);assert.equal(await page.locator('#planNormalPt').inputValue(),'123');
   await page.locator('[data-tab="archive"]').click();await page.locator('#sample').click();
+  await page.locator('[data-tab="inventory"]').click();
+  await page.locator('[data-kind-tab="members"]').click();
+  assert.equal(await page.locator('#cardStatus').inputValue(),'all');
+  assert.equal(await page.locator('#catalogCount').textContent(),'显示 64 / 64 张卡牌');
+  for(const id of [27,28,30,33])
+    assert.equal(await page.locator(`#cardCatalog [data-edit="members"][data-id="${id}"]`).count(),1);
+  await page.locator('[data-tab="plan"]').click();
   reports.push('event drafts stay saved and isolated across profile switches');
   const sampleId=await page.locator('#profileSelect').inputValue();
   const sampleBefore=await page.evaluate(()=>structuredClone(window.EventHost.state));

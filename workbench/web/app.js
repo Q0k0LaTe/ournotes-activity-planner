@@ -77,6 +77,7 @@ function fresh(){
 function addProfile(value){
   if(jobId||evaluating||stale)return;
   const input=normalize(value),id=crypto.randomUUID();archives.profiles.push({id,input,last_result:null});archives.active_id=id;state=input;
+  $('cardStatus').value='all';
   changed();renderAll();window.EventPages?.onTab(currentPage);notice('已保存为独立档案：'+state.name);
 }
 function projectLevels(){
@@ -124,7 +125,7 @@ function restoreResult(){
 function switchProfile(id){
   if(jobId||evaluating||stale||id===archives.active_id)return;
   if(!archives.profiles.some(p=>p.id===id))return;
-  archives.active_id=id;state=activeProfile().input;comparison=[];result=null;resultInput=null;save();renderAll();restoreResult();notice('已切换档案：'+state.name);
+  archives.active_id=id;state=activeProfile().input;comparison=[];result=null;resultInput=null;$('cardStatus').value='all';save();renderAll();restoreResult();notice('已切换档案：'+state.name);
   window.EventPages?.onTab(currentPage);
 }
 function filteredCandidates(){
@@ -228,7 +229,7 @@ function cardBonus(c,row,kind){
 }
 function renderCards(){
   const kind=$('kind').value,rows=new Map(state.profile.inventory[kind].map(r=>[r.id,r])),shown=shownCards(),names=rowFields(kind);
-  $('catalogCount').textContent=shown.length+' 张卡牌';
+  $('catalogCount').textContent=`显示 ${shown.length} / ${catalog[kind].length} 张卡牌`;
   document.querySelectorAll('[data-kind-tab]').forEach(b=>b.classList.toggle('active',b.dataset.kindTab===kind));
   $('cardTypeChips').innerHTML=`<button data-card-type="0" class="${!number($('cardType'))?'active':''}">全部属性</button>`+Object.entries(types).map(([id,name])=>`<button data-card-type="${id}" class="${number($('cardType'))===Number(id)?'active':''}"><span class="type-dot t${id}"></span>${esc(name.split(' · ')[0])}</button>`).join('');
   $('cardCatalog').innerHTML=shown.map(c=>{
@@ -432,7 +433,7 @@ async function init(){
     try{if(stored){archives=JSON.parse(stored);if(archives.schema_version!==2||!Array.isArray(archives.profiles)||!archives.profiles.length)throw new Error('档案格式不正确');const ids=new Set();for(const p of archives.profiles){if(typeof p.id!=='string'||ids.has(p.id))throw new Error('档案编号重复');ids.add(p.id);p.input=normalize(p.input);}if(!ids.has(archives.active_id))throw new Error('当前档案不存在');}
       else{const legacy=localStorage.getItem(STORE),id=crypto.randomUUID();archives={schema_version:2,active_id:id,profiles:[{id,input:legacy?normalize(JSON.parse(legacy)):fresh(),last_result:null}]};}
     }catch(e){const id=crypto.randomUUID();archives={schema_version:2,active_id:id,profiles:[{id,input:fresh(),last_result:null}]};notice('已保存档案无法读取：'+e.message+'。请导入备份；本次不会覆盖旧记录。',true);stale=true;}
-    state=activeProfile().input;$('cardStatus').value=state.profile.inventory.members.length?'owned':'all';renderAll();renderEvent();restoreResult();tab(location.hash.slice(1)||'plan',false);if(stale)busy(false);
+    state=activeProfile().input;$('cardStatus').value='all';renderAll();renderEvent();restoreResult();tab(location.hash.slice(1)||'plan',false);if(stale)busy(false);
     document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>tab(el.dataset.tab)));window.addEventListener('hashchange',()=>tab(location.hash.slice(1),false));
     for(const id of ['editInventory'])on(id,'click',()=>tab('inventory'));for(const id of ['backPlan','emptyPlan'])on(id,'click',()=>tab('plan'));on('profileManage','click',()=>tab('archive'));
     on('profileSelect','change',()=>switchProfile($('profileSelect').value));on('archiveList','click',e=>{const b=e.target.closest('[data-profile]');if(b)switchProfile(b.dataset.profile);});
@@ -451,7 +452,7 @@ async function init(){
     on('autoLeader','change',()=>{state.fixed_team.leader_id=$('autoLeader').checked?0:state.fixed_team.member_ids.find(Boolean)||0;changed();});on('clearFixed','click',()=>{state.fixed_team={member_ids:Array(5).fill(null),snap_ids:Array(5).fill(null),leader_id:0};changed();});
     for(const id of ['kind','cardType','cardRarity','cardBand','cardCharacter','cardStatus'])on(id,'change',renderCards);on('cardSearch','input',renderCards);
     on('kindButtons','click',e=>{const b=e.target.closest('[data-kind-tab]');if(b){$('kind').value=b.dataset.kindTab;renderCards();}});on('cardTypeChips','click',e=>{const b=e.target.closest('[data-card-type]');if(b){$('cardType').value=b.dataset.cardType;renderCards();}});
-    on('clearFilters','click',()=>{for(const id of ['cardType','cardRarity','cardBand','cardCharacter'])$(id).value=0;$('cardSearch').value='';$('cardStatus').value=state.profile.inventory[$('kind').value].length?'owned':'all';renderCards();});
+    on('clearFilters','click',()=>{for(const id of ['cardType','cardRarity','cardBand','cardCharacter'])$(id).value=0;$('cardSearch').value='';$('cardStatus').value='all';renderCards();});
     on('selectVisible','click',()=>selectVisible(true));on('unselectVisible','click',()=>selectVisible(false));on('selectAllOwned','click',()=>selectVisible(true,true));
     on('sample','click',()=>{addProfile(sample);tab('plan');notice('已新建合成示例档案，可直接计算。原档案已保留。');});on('new','click',()=>{addProfile(fresh());tab('archive');});
     on('import','change',async()=>{try{await importFile($('import').files[0]);}finally{$('import').value='';}});on('export','click',()=>download(state,state.name+'-卡库.json'));on('exportAll','click',()=>download({schema_version:2,profiles:archives.profiles.map(p=>({input:p.input}))},'OurNotes-全部档案.json'));
