@@ -79,6 +79,42 @@ function addProfile(value){
   const input=normalize(value),id=crypto.randomUUID();archives.profiles.push({id,input,last_result:null});archives.active_id=id;state=input;
   changed();renderAll();window.EventPages?.onTab(currentPage);notice('已保存为独立档案：'+state.name);
 }
+function projectLevels(){
+  const input=clone(state);
+  if(!input.profile.inventory.members.length||!input.profile.inventory.snaps.length){notice('请先在「我的卡牌」标记持有的成员卡和留影。');return;}
+  let raised=0,assumed=0;
+  for(const kind of ['members','snaps']){
+    for(const row of input.profile.inventory[kind]){
+      const caps=card(kind,row.id).caps,stage=caps.length-1,cap=caps[stage];
+      if(!Number.isInteger(cap))throw new Error(`卡牌 #${row.id} 缺少满级上限。`);
+      const before=JSON.stringify(row);
+      row.level=cap;
+      if(kind==='members'){
+        row.training_count=stage;row.awakening_count=4;
+        row.live_skill_level=5;row.gekisou_skill_level=5;
+      }else row.limit_break_count=stage;
+      if(JSON.stringify(row)!==before)raised++;
+    }
+  }
+  const ranks=new Map(input.profile.character_ranks.map(row=>[row.character_id,row]));
+  for(const character of catalog.characters){
+    let row=ranks.get(character.id);
+    if(!row){row={character_id:character.id,rank:1};input.profile.character_ranks.push(row);assumed++;}
+    else if(row.rank==null){row.rank=1;assumed++;}
+  }
+  const rankSum=input.profile.character_ranks.reduce((sum,row)=>sum+row.rank,0);
+  if(input.profile.character_total_rank==null||input.profile.character_total_rank<rankSum){input.profile.character_total_rank=rankSum;assumed++;}
+  if(input.profile.tgw_card_rank==null){input.profile.tgw_card_rank=1;assumed++;}
+  const facilities=new Map(input.profile.facilities.map(row=>[row.id,row]));
+  for(const facility of catalog.facilities){
+    let row=facilities.get(facility.id);
+    if(!row){row={id:facility.id,level:1};input.profile.facilities.push(row);assumed++;}
+    else if(row.level==null){row.level=1;assumed++;}
+  }
+  input.name+=' · 假设满升级';input.profile_kind='plan';input.operation='recommend';
+  addProfile(input);tab('plan');
+  notice(`已建立假设档案：${raised} 张卡按满级、满阶段和满技能计算；${assumed} 项未录入的账号加成按最低值补齐。点击「开始计算」查看配队。`);
+}
 function restoreResult(){
   const saved=activeProfile().last_result;
   if(saved&&saved.signature===signature&&JSON.stringify(saved.input)===JSON.stringify(state)&&saved.result?.version===version){
@@ -401,6 +437,7 @@ async function init(){
     for(const id of ['editInventory'])on(id,'click',()=>tab('inventory'));for(const id of ['backPlan','emptyPlan'])on(id,'click',()=>tab('plan'));on('profileManage','click',()=>tab('archive'));
     on('profileSelect','change',()=>switchProfile($('profileSelect').value));on('archiveList','click',e=>{const b=e.target.closest('[data-profile]');if(b)switchProfile(b.dataset.profile);});
     for(const[id,key]of Object.entries({memberType:'member_type',snapType:'snap_type',memberBand:'member_band',mode:'mode',strategy:'strategy',count:'count',powerAttribute:'music_attribute',memberRarity:'member_min_rarity',snapRarity:'snap_min_rarity'}))on(id,'change',()=>{state.team_settings[key]=['mode','strategy'].includes(key)?$(id).value:Number($(id).value);if(id==='strategy')state.operation='recommend';if(id==='memberBand')state.team_settings.allowed_band_ids=[];changed();renderGoal();});
+    on('projectLevels','click',projectLevels);
     on('allowedBands','click',e=>{const b=e.target.closest('[data-allowed-band]');if(!b)return;const id=Number(b.dataset.allowedBand);state.team_settings.member_band=0;$('memberBand').value=0;if(!id)state.team_settings.allowed_band_ids=[];else toggle(state.team_settings.allowed_band_ids,id,!state.team_settings.allowed_band_ids.includes(id));changed();});
     on('allowedCharacters','click',e=>{const b=e.target.closest('[data-allowed-character]');if(!b)return;const id=Number(b.dataset.allowedCharacter);if(!id)state.team_settings.allowed_character_ids=[];else toggle(state.team_settings.allowed_character_ids,id,!state.team_settings.allowed_character_ids.includes(id));changed();});
     on('requiredLeader','change',()=>{const id=number($('requiredLeader'));try{if(id){checkRequired('members',id);toggle(state.team_settings.required_member_ids,id,true);}state.team_settings.required_leader_id=id;changed();renderCards();}catch(e){renderRequiredLeader();throw e;}});

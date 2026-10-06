@@ -25,6 +25,24 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.locator('#profileSelect').selectOption(originalProfile);assert.equal(await page.locator('#planNormalPt').inputValue(),'123');
   await page.locator('[data-tab="archive"]').click();await page.locator('#sample').click();
   reports.push('event drafts stay saved and isolated across profile switches');
+  const sampleId=await page.locator('#profileSelect').inputValue();
+  const sampleBefore=await page.evaluate(()=>structuredClone(window.EventHost.state));
+  await page.locator('#projectLevels').click();
+  const projected=await page.evaluate(()=>({state:structuredClone(window.EventHost.state),
+    catalog:window.EventHost.catalog,archives:structuredClone(window.EventHost.archives)}));
+  assert.equal(projected.state.profile_kind,'plan');
+  assert.equal(projected.state.operation,'recommend');
+  for(const kind of ['members','snaps'])for(const row of projected.state.profile.inventory[kind]){
+    const source=sampleBefore.profile.inventory[kind].find(card=>card.id===row.id);
+    const cap=projected.catalog[kind].find(card=>card.id===row.id).caps.at(-1);
+    assert.equal(row.level,cap);
+    assert.equal(kind==='members'?row.training_count:row.limit_break_count,4);
+    if(kind==='members'){assert.equal(row.awakening_count,4);assert.equal(row.live_skill_level,5);}
+    assert.ok(row.level>=source.level);
+  }
+  assert.deepEqual(projected.archives.profiles.find(profile=>profile.id===sampleId).input.profile,sampleBefore.profile);
+  await page.locator('#profileSelect').selectOption(sampleId);
+  reports.push('hypothetical max-upgrade profile keeps the actual inventory unchanged');
   await page.locator('[data-tab="plan"]').click();await page.screenshot({path:path.join(DEST,'workbench-plan.png'),fullPage:true});
   await page.locator('#count').selectOption('15');
   await page.locator('#calculate').click();await complete(page);const first=await exported(page,'workbench-first');
