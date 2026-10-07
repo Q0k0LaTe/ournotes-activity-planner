@@ -14,7 +14,8 @@ async function importJson(page,value){
     await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(BASE).origin?route.continue():route.abort());
     const page=await context.newPage();
     await page.goto(BASE);
-    await page.waitForFunction(()=>document.getElementById('ownedCount').textContent==='0 + 0');
+    await page.waitForFunction(()=>document.getElementById('ownedCount').textContent==='0 + 0'||!document.getElementById('loadError').hidden,null,{timeout:120000});
+    if(await page.locator('#loadError').isVisible())throw new Error(await page.locator('#loadError').textContent());
     const initial=await page.evaluate(()=>window.EventHost.archives.profiles.length);
     const raw={accountid:'synthetic-private-id',playerData:{memberCards:[
       {masterId:'27',exp:123,liveSkillLevel:3},{masterId:'28'},{masterId:'27'},{masterId:'900001'}
