@@ -74,6 +74,33 @@ function fresh(){
   x.profile.character_total_rank=null;x.profile.tgw_card_rank=null;x.candidate_member_ids=[];x.candidate_snap_ids=[];x.team_settings=clone(defaults);
   return normalize(x);
 }
+function siriusOwnership(raw){
+  const data=raw?.playerData ?? raw?.player_data;
+  if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Sirius 文件缺少 playerData。请导出 /internal/v1/account/player-data 的 JSON 响应。');
+  const memberCards=data.memberCards ?? data.member_cards;
+  const supportCards=data.supportCards ?? data.support_cards;
+  if(memberCards===undefined&&supportCards===undefined)throw new Error('Sirius 玩家数据没有成员卡或留影列表。');
+  if((memberCards!==undefined&&!Array.isArray(memberCards))||(supportCards!==undefined&&!Array.isArray(supportCards)))throw new Error('Sirius 卡牌列表格式不正确。');
+  const profile=fresh();profile.name='Sirius 持有卡';
+  let unknown=0,duplicates=0;
+  for(const [kind,rows] of [['members',memberCards??[]],['snaps',supportCards??[]]]){
+    const ids=new Set();
+    for(const row of rows){
+      const value=row?.masterId ?? row?.master_id;
+      if(!((typeof value==='number'&&Number.isSafeInteger(value))||(typeof value==='string'&&/^\d+$/.test(value))))throw new Error('Sirius 卡牌缺少有效的 masterId。');
+      const id=Number(value);
+      if(!Number.isSafeInteger(id)||id<=0)throw new Error('Sirius 卡牌编号超出可读取范围。');
+      if(ids.has(id)){duplicates++;continue;}ids.add(id);
+      if(!card(kind,id)){unknown++;continue;}
+      const item=kind==='members'
+        ?{id,level:null,training_count:null,awakening_count:null,live_skill_level:null,gekisou_skill_level:null}
+        :{id,level:null,limit_break_count:null};
+      profile.profile.inventory[kind].push(item);profile[selectedKey(kind)].push(id);
+    }
+  }
+  if(!profile.profile.inventory.members.length&&!profile.profile.inventory.snaps.length)throw new Error('Sirius 文件中没有当前图鉴可识别的卡牌。');
+  return {profile,unknown,duplicates};
+}
 function addProfile(value){
   if(jobId||evaluating||stale)return;
   const input=normalize(value),id=crypto.randomUUID();archives.profiles.push({id,input,last_result:null});archives.active_id=id;state=input;
@@ -418,7 +445,8 @@ async function calculate(){
 }
 async function importFile(file){
   if(!file)return;if(file.size>5*1024*1024)throw new Error('档案文件超过 5 MiB。');const raw=JSON.parse(await file.text());
-  if(raw.schema_version===2&&Array.isArray(raw.profiles)){const entries=raw.profiles.map(p=>normalize(p.input));if(!entries.length)throw new Error('备份中没有档案。');for(const input of entries)archives.profiles.push({id:crypto.randomUUID(),input,last_result:null});archives.active_id=archives.profiles.at(-1).id;state=activeProfile().input;changed();renderAll();window.EventPages?.onTab(currentPage);notice('已追加导入 '+entries.length+' 份档案。原有档案保留。');}
+  if(raw?.playerData!==undefined||raw?.player_data!==undefined){const {profile,unknown,duplicates}=siriusOwnership(raw);addProfile(profile);notice(`已从 Sirius 导入 ${profile.profile.inventory.members.length} 张成员卡、${profile.profile.inventory.snaps.length} 张留影。养成数值尚未校准，请手动填写。${unknown?`当前图鉴未收录 ${unknown} 张，已跳过。`:''}${duplicates?`重复卡牌 ${duplicates} 张已合并。`:''}原有档案保留。`);}
+  else if(raw.schema_version===2&&Array.isArray(raw.profiles)){const entries=raw.profiles.map(p=>normalize(p.input));if(!entries.length)throw new Error('备份中没有档案。');for(const input of entries)archives.profiles.push({id:crypto.randomUUID(),input,last_result:null});archives.active_id=archives.profiles.at(-1).id;state=activeProfile().input;changed();renderAll();window.EventPages?.onTab(currentPage);notice('已追加导入 '+entries.length+' 份档案。原有档案保留。');}
   else{addProfile(raw);notice('卡库已导入为独立档案，原有档案保留。歌曲设置不参与计算。');}
 }
 async function init(){
