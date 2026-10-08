@@ -74,38 +74,17 @@ function fresh(){
   x.profile.character_total_rank=null;x.profile.tgw_card_rank=null;x.candidate_member_ids=[];x.candidate_snap_ids=[];x.team_settings=clone(defaults);
   return normalize(x);
 }
-function siriusOwnership(raw){
-  const data=raw?.playerData ?? raw?.player_data;
-  if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Sirius 文件缺少 playerData。请导出 /internal/v1/account/player-data 的 JSON 响应。');
-  const memberCards=data.memberCards ?? data.member_cards;
-  const supportCards=data.supportCards ?? data.support_cards;
-  if(memberCards===undefined&&supportCards===undefined)throw new Error('Sirius 玩家数据没有成员卡或留影列表。');
-  if((memberCards!==undefined&&!Array.isArray(memberCards))||(supportCards!==undefined&&!Array.isArray(supportCards)))throw new Error('Sirius 卡牌列表格式不正确。');
-  const profile=fresh();profile.name='Sirius 持有卡';
-  let unknown=0,duplicates=0;
-  for(const [kind,rows] of [['members',memberCards??[]],['snaps',supportCards??[]]]){
-    const ids=new Set();
-    for(const row of rows){
-      const value=row?.masterId ?? row?.master_id;
-      if(!((typeof value==='number'&&Number.isSafeInteger(value))||(typeof value==='string'&&/^\d+$/.test(value))))throw new Error('Sirius 卡牌缺少有效的 masterId。');
-      const id=Number(value);
-      if(!Number.isSafeInteger(id)||id<=0)throw new Error('Sirius 卡牌编号超出可读取范围。');
-      if(ids.has(id)){duplicates++;continue;}ids.add(id);
-      if(!card(kind,id)){unknown++;continue;}
-      const item=kind==='members'
-        ?{id,level:null,training_count:null,awakening_count:null,live_skill_level:null,gekisou_skill_level:null}
-        :{id,level:null,limit_break_count:null};
-      profile.profile.inventory[kind].push(item);profile[selectedKey(kind)].push(id);
-    }
-  }
-  if(!profile.profile.inventory.members.length&&!profile.profile.inventory.snaps.length)throw new Error('Sirius 文件中没有当前图鉴可识别的卡牌。');
-  return {profile,unknown,duplicates};
-}
 function addProfile(value){
   if(jobId||evaluating||stale)return;
   const input=normalize(value),id=crypto.randomUUID();archives.profiles.push({id,input,last_result:null});archives.active_id=id;state=input;
   $('cardStatus').value='all';
   changed();renderAll();window.EventPages?.onTab(currentPage);notice('已保存为独立档案：'+state.name);
+}
+function createAccount(){
+  const input=fresh();let number=1;
+  while(archives.profiles.some(p=>p.input.name===`账号 ${number}`))number++;
+  input.name=`账号 ${number}`;addProfile(input);tab('inventory');
+  notice(`已创建「${input.name}」。可在顶部切换卡组或改名。`);
 }
 function projectLevels(){
   const input=clone(state);
@@ -352,7 +331,7 @@ function download(value,name){downloadBlob(new Blob([JSON.stringify(value,null,2
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 async function post(path,body){const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Planner-Token':token},body:JSON.stringify(body)});const value=await response.json();if(!response.ok)throw new Error(value.error||'操作失败');return value;}
 function busy(on){
-  $('inputArea').disabled=on||stale;for(const id of ['sample','new','import','profileSelect','calculate','calculateInline','profileManage'])$(id).disabled=on||stale;
+  $('inputArea').disabled=on||stale;for(const id of ['sample','new','newAccount','import','profileSelect','renameProfile','calculate','calculateInline','profileManage'])$(id).disabled=on||stale;
   $('progressBox').hidden=!on;$('runStatus').innerHTML=on?'<span class="status-dot working"></span>正在计算':'<span class="status-dot"></span>'+(stale?'请刷新档案':'就绪');
 }
 function growthInput(){
@@ -445,8 +424,7 @@ async function calculate(){
 }
 async function importFile(file){
   if(!file)return;if(file.size>5*1024*1024)throw new Error('档案文件超过 5 MiB。');const raw=JSON.parse(await file.text());
-  if(raw?.playerData!==undefined||raw?.player_data!==undefined){const {profile,unknown,duplicates}=siriusOwnership(raw);addProfile(profile);notice(`已从 Sirius 导入 ${profile.profile.inventory.members.length} 张成员卡、${profile.profile.inventory.snaps.length} 张留影。养成数值尚未校准，请手动填写。${unknown?`当前图鉴未收录 ${unknown} 张，已跳过。`:''}${duplicates?`重复卡牌 ${duplicates} 张已合并。`:''}原有档案保留。`);}
-  else if(raw.schema_version===2&&Array.isArray(raw.profiles)){const entries=raw.profiles.map(p=>normalize(p.input));if(!entries.length)throw new Error('备份中没有档案。');for(const input of entries)archives.profiles.push({id:crypto.randomUUID(),input,last_result:null});archives.active_id=archives.profiles.at(-1).id;state=activeProfile().input;changed();renderAll();window.EventPages?.onTab(currentPage);notice('已追加导入 '+entries.length+' 份档案。原有档案保留。');}
+  if(raw.schema_version===2&&Array.isArray(raw.profiles)){const entries=raw.profiles.map(p=>normalize(p.input));if(!entries.length)throw new Error('备份中没有档案。');for(const input of entries)archives.profiles.push({id:crypto.randomUUID(),input,last_result:null});archives.active_id=archives.profiles.at(-1).id;state=activeProfile().input;changed();renderAll();window.EventPages?.onTab(currentPage);notice('已追加导入 '+entries.length+' 份档案。原有档案保留。');}
   else{addProfile(raw);notice('卡库已导入为独立档案，原有档案保留。歌曲设置不参与计算。');}
 }
 async function init(){
@@ -464,6 +442,7 @@ async function init(){
     state=activeProfile().input;$('cardStatus').value='all';renderAll();renderEvent();restoreResult();tab(location.hash.slice(1)||'plan',false);if(stale)busy(false);
     document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>tab(el.dataset.tab)));window.addEventListener('hashchange',()=>tab(location.hash.slice(1),false));
     for(const id of ['editInventory'])on(id,'click',()=>tab('inventory'));for(const id of ['backPlan','emptyPlan'])on(id,'click',()=>tab('plan'));on('profileManage','click',()=>tab('archive'));
+    on('renameProfile','click',()=>{tab('archive');$('archiveName').focus();$('archiveName').select();});on('newAccount','click',createAccount);
     on('profileSelect','change',()=>switchProfile($('profileSelect').value));on('archiveList','click',e=>{const b=e.target.closest('[data-profile]');if(b)switchProfile(b.dataset.profile);});
     for(const[id,key]of Object.entries({memberType:'member_type',snapType:'snap_type',memberBand:'member_band',mode:'mode',strategy:'strategy',count:'count',powerAttribute:'music_attribute',memberRarity:'member_min_rarity',snapRarity:'snap_min_rarity'}))on(id,'change',()=>{state.team_settings[key]=['mode','strategy'].includes(key)?$(id).value:Number($(id).value);if(id==='strategy')state.operation='recommend';if(id==='memberBand')state.team_settings.allowed_band_ids=[];changed();renderGoal();});
     on('projectLevels','click',projectLevels);
@@ -482,7 +461,7 @@ async function init(){
     on('kindButtons','click',e=>{const b=e.target.closest('[data-kind-tab]');if(b){$('kind').value=b.dataset.kindTab;renderCards();}});on('cardTypeChips','click',e=>{const b=e.target.closest('[data-card-type]');if(b){$('cardType').value=b.dataset.cardType;renderCards();}});
     on('clearFilters','click',()=>{for(const id of ['cardType','cardRarity','cardBand','cardCharacter'])$(id).value=0;$('cardSearch').value='';$('cardStatus').value='all';renderCards();});
     on('selectVisible','click',()=>selectVisible(true));on('unselectVisible','click',()=>selectVisible(false));on('selectAllOwned','click',()=>selectVisible(true,true));
-    on('sample','click',()=>{addProfile(sample);tab('plan');notice('已新建合成示例档案，可直接计算。原档案已保留。');});on('new','click',()=>{addProfile(fresh());tab('archive');});
+    on('sample','click',()=>{addProfile(sample);tab('plan');notice('已新建合成示例档案，可直接计算。原档案已保留。');});on('new','click',createAccount);
     on('import','change',async()=>{try{await importFile($('import').files[0]);}finally{$('import').value='';}});on('export','click',()=>download(state,state.name+'-卡库.json'));on('exportAll','click',()=>download({schema_version:2,profiles:archives.profiles.map(p=>({input:p.input}))},'OurNotes-全部档案.json'));
     on('copyProfile','click',()=>{const input=clone(state);input.name+=' · 升级规划';input.profile_kind='plan';addProfile(input);});on('deleteProfile','click',()=>{if(archives.profiles.length<2)return;if(!confirm('删除档案「'+state.name+'」？如需保留，请先导出。'))return;archives.profiles=archives.profiles.filter(p=>p.id!==archives.active_id);archives.active_id=archives.profiles[0].id;state=activeProfile().input;result=null;resultInput=null;comparison=[];save();renderAll();restoreResult();window.EventPages?.onTab(currentPage);});
     for(const id of ['name','archiveName'])on(id,'change',()=>{state.name=$(id).value.trim()||'我的卡库';changed();$('name').value=state.name;$('archiveName').value=state.name;});on('profileKind','change',()=>{state.profile_kind=$('profileKind').value;changed();});
