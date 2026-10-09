@@ -21,7 +21,7 @@ import planner_core as p
 import solver_search as upstream_solver
 from ortools.sat.python import cp_model
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 SCHEMA = 1
 BDON = 'https://bdon.moe/tools/chart-data'
 KINDS = {
@@ -216,8 +216,8 @@ def request_key(request, data):
 def workbench_catalog(data):
     """Explain the verified ON event rules without borrowing Bandori rules."""
     catalog = data.catalog()
-    event = data.index['MasterEvent'][1]
-    effects = [r for r in data.tables['MasterEventEffect'] if r['_eventId'] == 1]
+    event = data.index['MasterEvent'][data.event_id]
+    effects = [r for r in data.tables['MasterEventEffect'] if r['_eventId'] == data.event_id]
     names = {0: 'event_pt', 1: 'shop_pt', 2: 'parameter'}
     rules = {}
     for effect in effects:
@@ -239,10 +239,23 @@ def workbench_catalog(data):
             if kind == 'members':
                 live = data.index['MasterLiveSkill'][raw['_liveSkillID']]
                 card['live_skill_name'] = data.text[live['_nameTextID']]
-    catalog['event'] = {'id': 1, 'name': data.text[event['_nameTextId']],
+    catalog['event'] = {'id': data.event_id, 'name': '拜托了，倾心一掷',
+                        'original_name': data.text[event['_nameTextId']],
                         'start_at': event['_startAt'], 'end_at': event['_endAt'],
-                        'snapshot': '2026-10-01', 'rules': list(rules.values()),
+                        'snapshot': '2026-10-09', 'rules': list(rules.values()),
                         'parameter_bonus_applies_to': 'challenge_only'}
+    prior = data.index['MasterEvent'][1]
+    prior_rewards = p.read_json(data.snapshot / 'normalized/event_1.json')
+    catalog['event_archive'] = [{'id': 1, 'name': '爱的奔流 AtoZ',
+                                  'original_name': data.text[prior['_nameTextId']],
+                                  'start_at': prior['_startAt'], 'end_at': prior['_endAt'],
+                                  'snapshot': '2026-10-01',
+                                  'currency_item_id': prior_rewards['shop_currency_item_id'],
+                                  'normal_rewards': [{k: row[k] for k in ('rank', 'event_pt_base', 'shop_pt_base_guaranteed')}
+                                                     for row in prior_rewards['ordinary_base_rewards']],
+                                  'challenge_rewards': [{k: row[k] for k in ('rank', 'event_pt_base', 'shop_pt_base_guaranteed')}
+                                                        for row in prior_rewards['challenge_base_rewards']],
+                                  'url': 'https://haneoka.org/intl/zh-CN/events/1/'}]
     return catalog
 
 

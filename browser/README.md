@@ -1,6 +1,6 @@
-# 配队工作台浏览器适配 · v0.3.0
+# 配队工作台浏览器适配 · v0.3.1
 
-项目本版发布后暂停。参阅 [仓库 README](../README.md)、[开发说明](../guides/DEVELOPMENT.md) 和 [验证说明](../guides/VALIDATION.md)。
+本版更新活动与卡组数据。参阅 [仓库 README](../README.md)、[开发说明](../guides/DEVELOPMENT.md) 和 [验证说明](../guides/VALIDATION.md)。
 
 在此目录运行 `npx pnpm@11.19.0 install --frozen-lockfile`、`npx pnpm@11.19.0 build`，然后用 `python -B tests/preview_server.py` 本地预览。
 

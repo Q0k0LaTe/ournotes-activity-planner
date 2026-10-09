@@ -31,3 +31,4 @@ dialog{border:1px solid var(--line);border-radius:13px;padding:25px;color:var(--
 .score-slot div{display:grid;gap:4px;padding-top:8px;overflow-wrap:anywhere}
 .score-slot strong{font-size:.9rem}.score-slot small{color:#82728f}.score-slot a{font-size:.82rem}
 @media(max-width:800px){.score-team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card-art.image-failed img{visibility:hidden}.card-art.image-failed::after{content:'卡图暂时无法加载';position:absolute;inset:0;display:grid;place-items:center;padding:18px;color:#83728f;font-size:11px;text-align:center}

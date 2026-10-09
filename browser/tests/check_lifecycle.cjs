@@ -50,7 +50,7 @@ function compare(actual,expected){
   const full=JSON.parse(fs.readFileSync(path.join(DEST,'full-catalog-skip.json'),'utf8'));
   const other=await context.newPage();await other.goto(BASE);await ready(other);
   await importFixture(page,full.request);await page.locator('#calculate').click();
-  console.log('Testing entire 63-member / 64-Snap catalog');
+  console.log('Testing entire 67-member / 68-Snap catalog');
   await page.waitForFunction(()=>document.getElementById('progressCount').textContent.includes('最优验证'),null,{timeout:90000});
   const denied=await other.evaluate(async request=>{try{await Planner.request('/api/optimize',{body:JSON.stringify(request)});return null;}catch(e){return e.message;}},full.request);
   assert.match(denied,/另一个标签页/);await other.close();
@@ -65,7 +65,7 @@ function compare(actual,expected){
   if(await page.locator('#results').isHidden())throw new Error(await page.locator('#message').textContent());
   const complete=await exported(page,'full-catalog-browser');compare(complete,full.expected);
   assert.ok(complete.search.cached_sheets>=1);
-  reports.push({case:'all 63 members and 64 Snaps, exact full-pool skip optimum',passed:true,browser_search_seconds:complete.search.elapsed_seconds});
+  reports.push({case:'all 67 members and 68 Snaps, exact full-pool skip optimum',passed:true,browser_search_seconds:complete.search.elapsed_seconds});
   assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(DEST,'lifecycle-report.json'),JSON.stringify({passed:true,reports,errors},null,2));
   console.log(reports);

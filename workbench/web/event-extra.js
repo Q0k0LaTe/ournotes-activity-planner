@@ -28,9 +28,9 @@ window.EventPages = (() => {
   let simulations = [], loadedSongsProfile = null, simulationsProfile = null;
   let optimum = null, optimumProfile = null, loadedOptimumProfile = null, optimizingSong = false, songJobId = null;
   let modelProfile = null;
-  const key = () => `ournotes-event-plan-v1:${window.Planner?.scope || location.pathname}:${archives.active_id}`;
-  const songKey = () => `ournotes-song-results-v1:${window.Planner?.scope || location.pathname}:${archives.active_id}`;
-  const optimumKey = () => `ournotes-song-optimum-v1:${window.Planner?.scope || location.pathname}:${archives.active_id}`;
+  const key = () => `ournotes-event-plan-v1:${window.Planner?.scope || location.pathname}:event-${catalog.event.id}:${archives.active_id}`;
+  const songKey = () => `ournotes-song-results-v1:${window.Planner?.scope || location.pathname}:event-${catalog.event.id}:${archives.active_id}`;
+  const optimumKey = () => `ournotes-song-optimum-v1:${window.Planner?.scope || location.pathname}:event-${catalog.event.id}:${archives.active_id}`;
   const dateTimeLocal = date => {
     const d = new Date(date);
     if (!Number.isFinite(d.getTime())) return '';
@@ -70,7 +70,7 @@ window.EventPages = (() => {
   function sourceLabel() {
     const old = planSource === 'model' && (modelProfile !== JSON.stringify(state.profile) || planModelSignature !== window.EventHost.signature);
     $('planSource').textContent = old ? '模型值已过期，请重新计算' : planSource === 'model'
-      ? planBasis === 'rank' ? '配队加成＋假设评级 · 活动 #1' : '单曲模型估算 · 活动 #1'
+      ? planBasis === 'rank' ? `配队加成＋假设评级 · 活动 #${catalog.event.id}` : `单曲模型估算 · 活动 #${catalog.event.id}`
       : '手动实测 / 输入';
     $('planSource').className = 'badge' + (old ? ' warning-badge' : '');
   }
@@ -118,7 +118,7 @@ window.EventPages = (() => {
     $('songResult').hidden = false;
     $('songResult').innerHTML = `<div class="panel-head"><h2>${esc(value.song_title)} · ${esc(value.difficulty.toUpperCase())}</h2><span class="badge">模型估算 · ${esc(value.source.snapshot)}</span></div>
       <div class="plan-stats"><div><strong>${fmt(value.power)}</strong><span>实际歌曲综合力</span></div><div><strong>${fmt(score.minimum_score)}${score.maximum_score !== score.minimum_score ? '–'+fmt(score.maximum_score) : ''}</strong><span>${skipped ? '模型参考分 · 不记最高分' : '预计分数范围'}</span></div><div><strong>${esc(score.rank)}</strong><span>${skipped ? '固定奖励评级' : '保守评级'}</span></div><div><strong>${fmt(reward.event_pt)}</strong><span>每局活动 PT</span></div><div><strong>${fmt(reward.cp)}</strong><span>每局获得 CP</span></div><div><strong>${fmt(reward.shop_pt)}</strong><span>每局活动徽章</span></div></div>
-      <p class="tiny muted">${skipped ? '普通演出跳过固定按 C 评级结算，不更新最高分；模型参考分不参与奖励计算。' : '理论 AP/PERFECT，按技能顺序最低评级估算。'}普通演出不计活动参数加成；挑战演出计入。活动规则固定为 #1。</p>
+      <p class="tiny muted">${skipped ? '普通演出跳过固定按 C 评级结算，不更新最高分；模型参考分不参与奖励计算。' : '理论 AP/PERFECT，按技能顺序最低评级估算。'}普通演出不计活动参数加成；挑战演出计入。活动 #${catalog.event.id} 使用固定快照。</p>
       <button id="useSongResult" class="primary">填入活动拉表 →</button>`;
     $('useSongResult').addEventListener('click', () => useSimulation(value));
   }

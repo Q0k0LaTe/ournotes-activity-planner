@@ -33,6 +33,7 @@ import score_intervals
 from performance_trace import Trace
 
 VERSION = "0.2.5"
+ACTIVE_EVENT_ID = 2
 ORDERS = tuple(itertools.permutations(range(5)))
 RANKS = ("D", "C", "B", "A", "S", "SS")
 # Memory budget for matching states, never a limit on the candidate pool.
@@ -70,10 +71,10 @@ def demo_profile():
             "candidate_snap_ids": [33, 37, 52, 61, 3] if has_sample else [],
             "settings": {"boost_budget": 20, "boost_per_live": 4, "starting_cp": 0,
                          "challenge_cp": 200,
-                         "normal": {"song_id": 100109, "difficulty": "expert", "method": "ap",
-                                    "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100056, 100063, 100109)]},
-                         "challenge": {"song_id": 100109, "difficulty": "expert", "method": "ap",
-                                       "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100056, 100063, 100109)]}},
+                         "normal": {"song_id": 100111, "difficulty": "expert", "method": "ap",
+                                    "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100076, 100110, 100111)]},
+                         "challenge": {"song_id": 100111, "difficulty": "expert", "method": "ap",
+                                       "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100076, 100110, 100111)]}},
             "schema_version": 1, "is_demo": has_sample}
 
 
@@ -82,8 +83,8 @@ class Data:
     def __init__(self, snapshot=SNAPSHOT):
         self.snapshot = Path(snapshot)
         self.manifest, self.tables = dp._snapshot(self.snapshot)
-        self.snapshot_label = ("2026-10-01 + 成员 #64" if self.manifest.get("card_updates")
-                               else "2026-10-01")
+        self.snapshot_label = "2026-10-09 · 活动 #2"
+        self.event_id = ACTIVE_EVENT_ID
         self.skill_inputs = sk._load(self.snapshot.resolve())
         # The skill loader verifies formation groups. Additional cumulative and
         # static skill-category metadata for leader targets are verified here.
@@ -109,7 +110,7 @@ class Data:
                 raise InputError("此版本尚未覆盖回忆加成，不能按零加成计算。")
         # Build event reward data from the verified raw tables, rather than trust
         # a mutable normalized copy. This also validates its exact equivalence.
-        self.event = read_json(self.snapshot / "normalized/event_1.json")
+        self.event = read_json(self.snapshot / f"normalized/event_{self.event_id}.json")
         self._check_rewards()
         self.reward_context = rw.RewardContext(self.snapshot.resolve(), ms._freeze(self.event), self.manifest["data_commit"])
         self._score_inputs = None
@@ -155,7 +156,7 @@ class Data:
         # check its selected bases against raw rows before reusing that API.
         for challenge in (False, True):
             prefix = "MasterChallengeLive" if challenge else "MasterLive"
-            event = self.index["MasterEvent"][1]
+            event = self.index["MasterEvent"][self.event_id]
             point_group = event["_challengeLiveEventPointGroup" if challenge else "_liveEventPointGroup"]
             reward_group = event["_challengeLiveEventRewardGroup" if challenge else "_liveEventRewardGroup"]
             for base in self.event["challenge_base_rewards" if challenge else "ordinary_base_rewards"]:
@@ -211,7 +212,7 @@ class Data:
                     sheet = next(x for x in table if x["_id"] == r[f"_{diff}ID"])
                 sheets.append({"difficulty": diff, "level": sheet["_musicScoreLevel"], "notes": sheet["_fullComboCount"]})
             songs.append({"id": sid, "title": self.text[r["_titleTextID"]], "sheets": sheets,
-                          "challenge": any(c["_eventId"] == 1 and c["_liveMusicId"] == sid for c in self.tables["MasterChallengeMusic"])})
+                          "challenge": any(c["_eventId"] == self.event_id and c["_liveMusicId"] == sid for c in self.tables["MasterChallengeMusic"])})
         characters = [{"id": r["_id"], "name": self.text[r["_nameTextID"]], "band_id": r["_bandID"]}
                       for r in self.tables["MasterCharacter"]]
         bands = [{"id": r["_id"], "name": self.text[r["_nameTextID"]]} for r in self.tables["MasterBand"]]
@@ -221,7 +222,7 @@ class Data:
         return {"version": VERSION, "members": members, "snaps": snaps, "songs": songs,
                 "characters": characters, "bands": bands, "facilities": facilities,
                 "source": {"provider": "bdon / Moenotes", "snapshot": self.snapshot_label,
-                           "card_updates": self.manifest.get("card_updates", []),
+                           "game_updates": self.manifest.get("game_updates", []),
                            "data_commit": self.manifest["data_commit"],
                            "model_commit": self.manifest["bdon_linked_model_commit"]},
                 "limits": {"ap_bindings": None, "skip_sets": None,
@@ -427,7 +428,7 @@ class PowerModel:
                         raise InputError(f"请在「我的卡库」填写「{name}」的{label}。")
                     integer(owned[identifier].get(field), f"「{name}」的{label}", low, high)
         own = cp.calculate_selected_card_power(data.snapshot, profile, mids, sids)
-        bonus = eb.calculate_deck_bonuses(data.snapshot, profile, mids, sids)
+        bonus = eb.calculate_deck_bonuses(data.snapshot, profile, mids, sids, data.event_id)
         self.own = {r["id"]: r for r in own["members"]}
         self.support = {r["id"]: r for r in own["snaps"]}
         self.mb = {r["id"]: r for r in bonus["members"]}
@@ -501,7 +502,7 @@ class PowerModel:
         song = self.data.index["MasterLiveMusic"][sid]
         typ = song["_musicType"]
         if challenge:
-            row = dp._unique(self.data.tables["MasterChallengeMusic"], "challenge music", _eventId=1, _liveMusicId=sid)
+            row = dp._unique(self.data.tables["MasterChallengeMusic"], "challenge music", _eventId=self.data.event_id, _liveMusicId=sid)
             typ = row["_musicType"] or typ
         self.base, self.b, self.pair = self._power_context(challenge)
         self.music_type = typ
@@ -542,7 +543,7 @@ class Scores:
             raise InputError("请选择手动 AP 参考或跳过参考。")
         song = integer(spec.get("song_id"), "歌曲 ID", 1)
         try:
-            self.chart = ms.prepare_ap_chart(data.snapshot, song, spec.get("difficulty"), 1, ordinary=not challenge,
+            self.chart = ms.prepare_ap_chart(data.snapshot, song, spec.get("difficulty"), 1, data.event_id, ordinary=not challenge,
                                             _conversion_report=data.conversion_report, _verified_inputs=data.score_inputs)
         except ValueError as e:
             raise InputError(f"此歌曲或谱面暂未接入：{e}") from e
@@ -823,7 +824,7 @@ def _song_specs(settings, mode, data):
         diff = sheet.get("difficulty")
         if not isinstance(diff, str) or (sid, diff) not in available:
             raise InputError("勾选的歌曲或难度尚未接入。")
-        if mode == "challenge" and not any(r["_eventId"] == 1 and r["_liveMusicId"] == sid for r in data.tables["MasterChallengeMusic"]):
+        if mode == "challenge" and not any(r["_eventId"] == data.event_id and r["_liveMusicId"] == sid for r in data.tables["MasterChallengeMusic"]):
             raise InputError("这首歌不在本活动的挑战乐曲列表内。")
         if (sid, diff) in seen:
             raise InputError("同一个谱面不能重复选择。")
@@ -1259,7 +1260,7 @@ def combine_plans(evaluations, budget, boost, starting, cost, request=None, data
     if data:
         result["source"] = {"provider": "bdon / Moenotes", "data_commit": data.manifest["data_commit"],
                             "model_commit": data.manifest["bdon_linked_model_commit"], "snapshot": data.snapshot_label,
-                            "card_updates": data.manifest.get("card_updates", [])}
+                            "game_updates": data.manifest.get("game_updates", [])}
     if request:
         result["inputs"] = {"candidate_member_ids": request["candidate_member_ids"],
                             "candidate_snap_ids": request["candidate_snap_ids"], "settings": request["settings"]}
@@ -1278,16 +1279,17 @@ def calibration(data=None):
     # The shareable package retains historical validation numbers, but does not
     # contain the owner's actual inventory or growth profile. It rechecks public
     # reward arithmetic only; never claim a fresh power check without the fixture.
-    challenge = rw.preview_challenge_rewards(data.snapshot, "B", 200, 10800, 14000)
-    ordinary = rw.preview_normal_rewards(data.snapshot, "B", 4, 10600, 15000)
+    challenge = rw.preview_challenge_rewards(data.snapshot, "B", 200, 10800, 14000, event_id=1)
+    ordinary = rw.preview_normal_rewards(data.snapshot, "B", 4, 10600, 15000, event_id=1)
     passed = power_matches is not False and challenge["gained"] == {"cp": 0, "event_pt": 5304, "shop_pt": 8160} and ordinary["gained"] == {"cp": 100, "event_pt": 1442, "shop_pt": 2100}
     if not passed:
         raise InputError("截图校准未通过，已停止计算。")
-    return {"passed": True, "power_recomputed": power_matches is True, "actual": {"power": 812225, "challenge_manual_score": 4278210,
+    return {"passed": True, "power_recomputed": power_matches is True, "event_id": 1,
+            "scope": "historical_event_1_receipt", "actual": {"power": 812225, "challenge_manual_score": 4278210,
                                        "challenge_rank": "B", "challenge_event_pt": 5304, "challenge_shop_pt": 8160,
                                        "challenge_cp_gained": 0, "normal_event_pt": 1442, "normal_shop_pt": 2100,
                                        "normal_cp": 100},
-            "notes": ["综合力与挑战收益匹配已核对的截图。挑战实测为手动 AP。",
+            "notes": ["历史活动 #1 的综合力与挑战收益匹配已核对的截图；活动 #2 尚无实机结算校准。",
                       "200 CP 是与 1 倍收益相符的模型输入，实际扣费未由结算截图直接显示。",
                       "普通演出截图为另一组未知队伍；只用于核对收益，不能当作当前队伍的普通演出实测。",
                       "后续搜索结果均为模型估算；截图示例不等于你的完整卡库。"]}

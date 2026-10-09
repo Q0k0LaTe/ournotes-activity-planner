@@ -17,12 +17,16 @@ class CardUpdateTests(unittest.TestCase):
 
     def test_birthday_member_is_in_catalog_and_usable_as_leader(self):
         catalog = teams.workbench_catalog(self.data)
-        self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (64, 64))
-        for kind in ('members', 'snaps'):
+        self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (67, 68))
+        for kind, last in (('members', 67), ('snaps', 68)):
             cards = catalog[kind]
-            self.assertEqual({c['id'] for c in cards}, set(range(1, 65)))
+            self.assertEqual({c['id'] for c in cards}, set(range(1, last + 1)))
             self.assertEqual(sum(c['rarity'] == 2 for c in cards), 25)
-            self.assertEqual(sum(c['rarity'] == 3 for c in cards), 26)
+            self.assertEqual(sum(c['rarity'] == 3 for c in cards), 27)
+        self.assertEqual([c['title'] for c in catalog['members'] if c['id'] in (65, 66, 67)],
+                         ['薄明を裂いて', '光芒に立つ', '笑み、暗がりにて'])
+        self.assertEqual([c['title'] for c in catalog['snaps'] if c['id'] in (65, 66, 67, 68)],
+                         ['赤橙の中', 'きみのため', '光、手をかざして', 'DIMENSIONAL OVERLAP'])
         for identifier, title in ((27, 'きらめくステージ'), (28, 'おもしれー音'),
                                   (30, '一途な律動'), (33, '盤石の低音')):
             card = next(c for c in catalog['members'] if c['id'] == identifier)
@@ -38,7 +42,7 @@ class CardUpdateTests(unittest.TestCase):
         request = sample(self.data)
         request['candidate_member_ids'][0] = 64
         request['profile']['inventory']['members'][0]['id'] = 64
-        request['fixed_team'] = {'member_ids': request['candidate_member_ids'],
+        request['fixed_team'] = {'member_ids': request['candidate_member_ids'][:5],
                                  'snap_ids': request['candidate_snap_ids'][:5], 'leader_id': 64}
         result = teams.evaluate(request, self.data)
         self.assertEqual(result['status'], 'complete_fixed_team')

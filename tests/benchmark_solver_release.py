@@ -29,7 +29,7 @@ def full_request(data, maximum=False):
     request["candidate_member_ids"] = [c["id"] for c in catalog["members"]]
     request["candidate_snap_ids"] = [c["id"] for c in catalog["snaps"]]
     for mode in ("normal", "challenge"):
-        request["settings"][mode].update(method="skip", sheets=[{"song_id": 100109, "difficulty": "expert"}])
+        request["settings"][mode].update(method="skip", sheets=[{"song_id": 100111, "difficulty": "expert"}])
     return request
 
 

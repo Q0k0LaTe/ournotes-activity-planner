@@ -84,9 +84,9 @@ def optimize(raw, data, progress=lambda **kw: None, cancelled=lambda: False):
     if song is None:
         raise p.InputError('当前数据快照没有这首歌。')
     challenge = mode == 'challenge'
-    if challenge and not any(row['_eventId'] == 1 and row['_liveMusicId'] == song_id
+    if challenge and not any(row['_eventId'] == data.event_id and row['_liveMusicId'] == song_id
                              for row in data.tables['MasterChallengeMusic']):
-        raise p.InputError('这首歌不属于活动 1 的挑战演出。')
+        raise p.InputError(f'这首歌不属于活动 {data.event_id} 的挑战演出。')
     consumed = teams.live_consumption(raw.get('consumed'), mode, data)
     mids, sids = request['candidate_member_ids'], request['candidate_snap_ids']
     model = p.PowerModel(data, request['profile'], mids, sids)
@@ -187,4 +187,4 @@ def optimize(raw, data, progress=lambda **kw: None, cancelled=lambda: False):
                                       'maximum conservative event badges') if objective != 'score' else
                                      'maximum minimum theoretical score over 120 AP skill orders' if method == 'ap' else
                                      'maximum skip score')},
-            'source': {'snapshot': data.snapshot_label, 'event_id': 1, 'basis': 'model_estimate'}}
+            'source': {'snapshot': data.snapshot_label, 'event_id': data.event_id, 'basis': 'model_estimate'}}

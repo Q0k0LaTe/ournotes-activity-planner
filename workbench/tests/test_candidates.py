@@ -15,6 +15,8 @@ from app import Cache, sample
 
 def fixture(data, snaps=7):
     request = sample(data)
+    request['candidate_member_ids'] = request['candidate_member_ids'][:5]
+    request['profile']['inventory']['members'] = request['profile']['inventory']['members'][:5]
     request['candidate_snap_ids'] = request['candidate_snap_ids'][:snaps]
     request['team_settings']['count'] = 3
     return request
@@ -79,6 +81,10 @@ class CandidateTests(unittest.TestCase):
 
     def test_leader_binding_and_bonus_floor_match_exhaustive_oracle(self):
         request = fixture(self.data, 6)
+        request['candidate_member_ids'].append(65)
+        request['profile']['inventory']['members'].append(
+            {'id': 65, 'level': 20, 'training_count': 0, 'awakening_count': 0,
+             'live_skill_level': 1, 'gekisou_skill_level': 1})
         request['team_settings'].update(required_leader_id=59,
             required_bindings=[{'member_id': 59, 'snap_id': 33}],
             min_event_bonus_10000=100, min_shop_bonus_10000=100)

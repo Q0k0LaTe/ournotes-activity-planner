@@ -16,7 +16,7 @@ from pathlib import Path
 import struct
 
 
-DATA_COMMIT = "0f8644dd85b7c3d21794fb3f718e48773cd1cc60"
+DATA_COMMIT = "29b2365a5ed294b4a517a9109c3cfa5ca89125f1"
 MODEL_COMMIT = "dbd9cf01a4854808dceb6aedcd4041af372faeee"
 TABLES = (
     "MasterMemberCard", "MasterSupportCard", "MasterSupportCardRank",

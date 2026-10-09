@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {plan, reward} = require('../workbench/web/event-math.js');
-const event = {id:1};
+const event = {id:2};
 
 const base = {
   now:'2026-10-05T12:00:00', endAt:'2026-10-07T23:59:00', current:0,
@@ -34,7 +34,7 @@ test('reports a daily capacity shortfall and rejects unreachable goals', () => {
   assert.throws(() => plan({...base, normalPt:0, normalCp:0, challengePt:0}), /无法达到目标/);
 });
 
-test('rejects costs that cannot occur in event 1', () => {
+test('rejects costs that cannot occur in event 2', () => {
   assert.throws(() => plan({...base, normalBoost: 1.5}), /普通每局 Boost/);
   assert.throws(() => plan({...base, normalBoost: 11}), /普通每局 Boost/);
   assert.throws(() => plan({...base, challengeCost: 600}), /挑战每局 CP/);
@@ -53,7 +53,7 @@ test('meets both cumulative PT and event badge targets with conserved CP', () =>
 
 test('uses exact event reward bases for song-free team planning', () => {
   const bases = {normal:{D:[15,18,3],C:[25,30,4],B:[35,42,5],A:[50,60,6],S:[75,90,8],SS:[100,120,10]},
-    challenge:{D:[1500,1450],C:[2000,2650],B:[2550,3400],A:[3250,3750],S:[3900,4450],SS:[5000,4950]}};
+    challenge:{D:[1500,2150],C:[2000,2650],B:[2750,3400],A:[3500,4150],S:[4500,4900],SS:[5500,5650]}};
   for (const [mode, ranks] of Object.entries(bases)) {
     for (const [rank, [pt, shop, cp]] of Object.entries(ranks)) {
       for (const consumed of mode === 'normal' ? [1,4,10] : [200,400,800,1600]) {

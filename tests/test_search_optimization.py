@@ -21,6 +21,8 @@ from sample import sample
 def fixture(data):
     """Synthetic owned cards with the legacy planner's run settings."""
     request = sample(data)
+    request["candidate_member_ids"] = request["candidate_member_ids"][:5]
+    request["profile"]["inventory"]["members"] = request["profile"]["inventory"]["members"][:5]
     request["settings"] = copy.deepcopy(p.demo_profile()["settings"])
     return request
 
@@ -54,7 +56,7 @@ def expanded_request(data, count=10):
     if len(existing) < count:
         raise AssertionError("not enough supported fixture Snaps")
     for mode in ("normal", "challenge"):
-        request["settings"][mode]["sheets"] = [{"song_id": 100109, "difficulty": "expert"}]
+        request["settings"][mode]["sheets"] = [{"song_id": 100111, "difficulty": "expert"}]
     return request
 
 
@@ -118,19 +120,19 @@ class LargePoolTests(unittest.TestCase):
             plan=output["plans"][objective]
             self.assertEqual(plan["totals"],p.cycle(plan["normal"]["per_live"],plan["challenge"]["per_live"],20,4,0,200))
 
-    def test_skip_all_64_snaps_finishes_above_old_70000_cap(self):
+    def test_skip_all_68_snaps_finishes_above_old_70000_cap(self):
         request=fixture(self.data)
         request["candidate_snap_ids"]=list(self.data.index["MasterSupportCard"])
         owned=p.cp._inventory(request["profile"],"snaps")
         request["profile"]["inventory"]["snaps"]=[owned.get(c["id"],{"id":c["id"],"level":min(20,c["caps"][0]),"limit_break_count":0}) for c in self.data.catalog()["snaps"]]
         for mode in ("normal","challenge"):
-            request["settings"][mode].update(method="skip",sheets=[{"song_id":100109,"difficulty":"expert"}])
+            request["settings"][mode].update(method="skip",sheets=[{"song_id":100111,"difficulty":"expert"}])
         out=p.optimize(request,data=self.data)
         self.assertTrue(out["search"]["complete"])
-        self.assertEqual(out["search"]["counts"]["normal"]["evaluated_bindings"],7624512)
+        self.assertEqual(out["search"]["counts"]["normal"]["evaluated_bindings"],10424128)
         self.assertLess(out["search"]["counts"]["normal"]["optimization"]["score_evaluations"],1000)
 
-    def test_full_63_member_64_snap_pool_starts_lazily_and_cancels_with_a_cursor(self):
+    def test_full_67_member_68_snap_pool_starts_lazily_and_cancels_with_a_cursor(self):
         request=fixture(self.data)
         catalog=self.data.catalog()
         request["profile"]={"schema_version":1,
@@ -142,7 +144,7 @@ class LargePoolTests(unittest.TestCase):
         request["candidate_member_ids"]=[c["id"] for c in catalog["members"]]
         request["candidate_snap_ids"]=[c["id"] for c in catalog["snaps"]]
         for mode in ("normal","challenge"):
-            request["settings"][mode].update(method="skip",sheets=[{"song_id":100109,"difficulty":"expert"}])
+            request["settings"][mode].update(method="skip",sheets=[{"song_id":100111,"difficulty":"expert"}])
         stop=[False]
         progress_rows=[]
         def progress(**row):
@@ -164,7 +166,7 @@ class LargePoolTests(unittest.TestCase):
         for method in ("ap","skip"):
             request=fixture(self.data)
             for mode in ("normal","challenge"):
-                request["settings"][mode].update(method=method,sheets=[{"song_id":100109,"difficulty":"expert"}])
+                request["settings"][mode].update(method=method,sheets=[{"song_id":100111,"difficulty":"expert"}])
             with patch.object(solver_search,"should_use_solver",return_value=False):
                 normal=p.optimize(request,data=self.data)
             with patch.object(solver_search,"should_use_solver",return_value=False), patch.object(p,"MAX_MATCH_STATES",1):
@@ -188,7 +190,7 @@ class LargePoolTests(unittest.TestCase):
             request["profile"]["inventory"]["members"].append(other)
         request["candidate_member_ids"].append(other["id"])
         for mode in ("normal","challenge"):
-            request["settings"][mode].update(method="skip",sheets=[{"song_id":100109,"difficulty":"expert"}])
+            request["settings"][mode].update(method="skip",sheets=[{"song_id":100111,"difficulty":"expert"}])
         with tempfile.TemporaryDirectory() as directory:
             cache=SearchCache(directory)
             stop=[False]
@@ -214,7 +216,7 @@ class LargePoolTests(unittest.TestCase):
                             fresh["search"]["counts"]["normal"]["evaluated_bindings"])
 
     def test_score_cache_stays_bounded(self):
-        scores=p.Scores(self.data,{"song_id":100109,"difficulty":"expert","method":"skip"},False)
+        scores=p.Scores(self.data,{"song_id":100111,"difficulty":"expert","method":"skip"},False)
         with patch.object(p,"MAX_SCORE_CACHE",4):
             for power in range(700000,700011):
                 scores.evaluate(power)
@@ -224,7 +226,7 @@ class LargePoolTests(unittest.TestCase):
         request=fixture(self.data)
         request["candidate_snap_ids"] = request["candidate_snap_ids"][:5]
         slots=p.sk.derive_ap_skill_contract(self.data.snapshot,request["profile"],request["candidate_member_ids"],request["candidate_snap_ids"],_verified_inputs=self.data.skill_inputs)["slots"]
-        for song, diff, power in ((100109,"expert",812225),(100063,"hard",700001)):
+        for song, diff, power in ((100111,"expert",812225),(100110,"hard",700001)):
             scores=p.Scores(self.data,{"song_id":song,"difficulty":diff,"method":"ap"},True)
             direct=[p.ms.score_order(dict(scores.chart,power=power),slots,order) for order in p.ORDERS]
             upper=scores.rank_upper_bound(power,slots)

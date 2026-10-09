@@ -49,8 +49,8 @@ function compare(actual, expected) {
     assert.equal(await page.locator('#loadError').isVisible(),false);
     const bootstrap=await page.evaluate(()=>Planner.request('/api/bootstrap'));
     assert.equal(bootstrap.catalog.version,require('../upstream.json').version);
-    assert.equal(bootstrap.catalog.songs.length,85);
-    assert.equal(bootstrap.catalog.members.length,63);
+    assert.equal(bootstrap.catalog.songs.length,87);
+    assert.equal(bootstrap.catalog.members.length,67);
     assert.equal(bootstrap.calibration.power_recomputed,false);
     assert.equal(bootstrap.demo.is_demo,false);
     assert.ok(bootstrap.catalog.members.every(card=>card.thumbnail.startsWith('card-images/')));
@@ -81,7 +81,7 @@ function compare(actual, expected) {
       await page.screenshot({path:path.join(DEST,'browser-'+width+'.png'),fullPage:true});
     }
     await page.locator('[data-tab="inventory"]').click();
-    for(const [kind,count] of [['members',63],['snaps',64]]) {
+    for(const [kind,count] of [['members',67],['snaps',68]]) {
       await page.locator('#addKind').selectOption(kind);
       await page.locator('#cardCatalog .card-art img').evaluateAll(images=>images.forEach(img=>img.loading='eager'));
       await page.waitForFunction(expected=>{

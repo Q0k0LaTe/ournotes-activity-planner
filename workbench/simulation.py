@@ -29,9 +29,9 @@ def simulate(raw, data):
     if song is None:
         raise p.InputError('当前数据快照没有这首歌。')
     challenge = mode == 'challenge'
-    if challenge and not any(row['_eventId'] == 1 and row['_liveMusicId'] == song_id
+    if challenge and not any(row['_eventId'] == data.event_id and row['_liveMusicId'] == song_id
                              for row in data.tables['MasterChallengeMusic']):
-        raise p.InputError('这首歌不属于活动 1 的挑战演出。')
+        raise p.InputError(f'这首歌不属于活动 {data.event_id} 的挑战演出。')
     difficulty, method = raw.get('difficulty'), raw.get('method')
     if difficulty not in ('easy', 'normal', 'hard', 'expert') or method not in ('ap', 'skip'):
         raise p.InputError('请选择已支持的谱面难度和打法。')
@@ -64,4 +64,4 @@ def simulate(raw, data):
             'difficulty': difficulty, 'mode': mode, 'method': method, 'consumed': consumed,
             'team': {'member_ids': mids, 'snap_ids': sids, 'leader_id': leader},
             'power': power, 'bonuses_10000': bonuses, 'score': score, 'per_live': rewards,
-            'source': {'snapshot': data.snapshot_label, 'event_id': 1, 'basis': 'model_estimate'}}
+            'source': {'snapshot': data.snapshot_label, 'event_id': data.event_id, 'basis': 'model_estimate'}}

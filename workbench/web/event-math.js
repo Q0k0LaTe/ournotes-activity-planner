@@ -11,20 +11,20 @@
     if (!Number.isFinite(n) || n <= 0) throw new Error(label + '需填写大于 0 的数字。');
     return n;
   }
-  // Event #1, 2026-10-01 normalized reward snapshot. The source-model checks
-  // in test_event_rewards.py verify these rank bases and consumption rates.
+  // Event #2, 2026-10-09 normalized reward snapshot. Tests compare these bases
+  // with the pinned Master tables and Python reward preview.
   const rewardBases = {
     normal: {D:[15,18,3], C:[25,30,4], B:[35,42,5], A:[50,60,6], S:[75,90,8], SS:[100,120,10]},
-    challenge: {D:[1500,1450], C:[2000,2650], B:[2550,3400], A:[3250,3750], S:[3900,4450], SS:[5000,4950]},
+    challenge: {D:[1500,2150], C:[2000,2650], B:[2750,3400], A:[3500,4150], S:[4500,4900], SS:[5500,5650]},
   };
   function reward(event, mode, rank, consumed, bonuses) {
-    if (event?.id !== 1) throw new Error('当前收益表仅支持活动 #1。');
+    if (event?.id !== 2) throw new Error('当前收益表仅支持活动 #2。');
     if (mode !== 'normal' && mode !== 'challenge') throw new Error('请选择普通或挑战演出。');
     const challenge = mode === 'challenge';
     const base = rewardBases[mode][rank];
     const allowed = challenge ? [200,400,800,1600] : [1,2,3,4,5,6,7,8,9,10];
     const rate = allowed.includes(consumed) ? (challenge ? consumed / 200 : consumed * 5) : null;
-    if (!base || !rate) throw new Error('所选评级或消耗档位不在活动 #1 的收益表中。');
+    if (!base || !rate) throw new Error('所选评级或消耗档位不在活动 #2 的收益表中。');
     const ptBonus = integer(bonuses?.event_pt, '活动 PT 加成');
     const shopBonus = integer(bonuses?.shop_pt, '活动徽章加成');
     const amount = factors => {

@@ -1,4 +1,4 @@
-"""Cross-check event #1 rewards against published bases and raw rate rows."""
+"""Cross-check event #2 rewards against pinned raw Master rows."""
 import unittest
 
 import planner_core as p
@@ -13,8 +13,8 @@ class EventRewardTests(unittest.TestCase):
         ordinary_pt = dict(zip(p.RANKS, (15, 25, 35, 50, 75, 100)))
         ordinary_badges = dict(zip(p.RANKS, (18, 30, 42, 60, 90, 120)))
         ordinary_cp = dict(zip(p.RANKS, (3, 4, 5, 6, 8, 10)))
-        challenge_pt = dict(zip(p.RANKS, (1500, 2000, 2550, 3250, 3900, 5000)))
-        challenge_badges = dict(zip(p.RANKS, (1450, 2650, 3400, 3750, 4450, 4950)))
+        challenge_pt = dict(zip(p.RANKS, (1500, 2000, 2750, 3500, 4500, 5500)))
+        challenge_badges = dict(zip(p.RANKS, (2150, 2650, 3400, 4150, 4900, 5650)))
         for challenge in (False, True):
             bases = self.data.event['challenge_base_rewards' if challenge else 'ordinary_base_rewards']
             for base in bases:
@@ -38,7 +38,7 @@ class EventRewardTests(unittest.TestCase):
                         self.assertEqual(preview['cp'], 0 if challenge else base['cp_base'] * rate)
 
     def test_raw_effect_rows_separate_member_pt_and_snap_badge_bonuses(self):
-        rows = [row for row in self.data.tables['MasterEventEffect'] if row['_eventId'] == 1]
+        rows = [row for row in self.data.tables['MasterEventEffect'] if row['_eventId'] == self.data.event_id]
         self.assertEqual(len(rows), 20)
         self.assertEqual({row['_resourceTypeConstraint'] for row in rows if row['_eventBonusType'] == 0}, {2})
         self.assertEqual({row['_resourceTypeConstraint'] for row in rows if row['_eventBonusType'] == 1}, {3})

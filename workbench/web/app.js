@@ -20,6 +20,15 @@ const selectedKey = kind => kind==='members'?'candidate_member_ids':'candidate_s
 const requiredKey = kind => kind==='members'?'required_member_ids':'required_snap_ids';
 function on(id,event,fn){$(id).addEventListener(event,e=>Promise.resolve().then(()=>fn(e)).catch(e=>notice(e.message,true)));}
 function notice(text,error=false){$('message').hidden=!text;$('message').textContent=text;$('message').className='notice'+(error?' error':'');}
+function imageRetryUrl(src,attempt){const url=new URL(src,location.href);url.searchParams.set('image-retry',String(attempt));return url.href;}
+document.addEventListener('error',event=>{
+  const img=event.target;
+  if(!(img instanceof HTMLImageElement))return;
+  const attempts=Number(img.dataset.imageRetries||0);
+  if(attempts>=2){img.parentElement?.classList.add('image-failed');return;}
+  img.dataset.imageRetries=String(attempts+1);
+  setTimeout(()=>{if(img.isConnected)img.src=imageRetryUrl(img.src,attempts+1);},200*(attempts+1));
+},true);
 function toggle(list,id,on){const index=list.indexOf(id);if(on&&index<0)list.push(id);if(!on&&index>=0)list.splice(index,1);}
 function options(map,blank='全部'){return `<option value="0">${blank}</option>`+Object.entries(map).map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('');}
 function save(){
@@ -207,7 +216,7 @@ function eventRuleTitle(rule){
   return '<span>'+(names.join(' + ')||'全部卡牌')+'</span>';
 }
 function renderEvent(){
-  $('eventName').textContent='#1 · '+catalog.event.name;$('eventDates').textContent=catalog.event.start_at.slice(0,10)+' — '+catalog.event.end_at.slice(0,10)+'（快照预设）';
+  $('eventName').textContent='#'+catalog.event.id+' · '+catalog.event.name;$('eventDates').textContent=catalog.event.start_at.slice(0,10)+' — '+catalog.event.end_at.slice(0,10)+'（日服 Master 预设）';
   const currency={event_pt:'活动 PT',shop_pt:'活动徽章',parameter:'挑战参数'};
   $('eventRules').innerHTML=['members','snaps'].map(kind=>`<div class="event-group"><h3>${kind==='members'?'成员加成 · 按觉醒次数':'留影加成 · 按突破次数'}</h3>${catalog.event.rules.filter(r=>r.kind===kind).map(r=>`<div class="event-rule"><div class="event-rule-title">${eventRuleTitle(r)}</div><div class="event-rule-values">${Object.entries(r.rates).map(([name,values])=>`${currency[name]} +${fmt(values[0]/100)}～${fmt(values[4]/100)}%`).join('<br>')}</div></div>`).join('')}</div>`).join('');
 }
@@ -320,6 +329,7 @@ function renderGrowth(){
   $('growthFields').innerHTML=catalog.bands.filter(b=>!growthBand||b.id===growthBand).map(b=>`<section class="panel growth-band"><h3>${esc(b.name)}</h3><div class="growth-caption">角色等级</div><div class="growth-row">${catalog.characters.filter(c=>c.band_id===b.id).map(c=>`<label>${esc(c.name)}<input type="number" min="1" max="1000" data-rank="${c.id}" value="${state.profile.character_ranks.find(r=>r.character_id===c.id)?.rank??''}" placeholder="实际等级"></label>`).join('')}</div><div class="growth-caption">乐队道具</div><div class="growth-row">${catalog.facilities.filter(f=>f.band_id===b.id).map(f=>`<label>${esc(f.name)}<input type="number" min="1" max="${f.max_level}" data-facility="${f.id}" value="${state.profile.facilities.find(r=>r.id===f.id)?.level??''}" placeholder="实际等级"></label>`).join('')}</div></section>`).join('');
 }
 function renderArchive(){
+  $('eventArchiveList').innerHTML=(catalog.event_archive||[]).map(event=>`<article class="archive-entry"><span class="badge">活动 #${event.id} · 已结束</span><strong>${esc(event.name)}</strong><p>${esc(event.start_at.slice(0,10))} — ${esc(event.end_at.slice(0,10))} · ${esc(event.snapshot)} 快照 · 徽章道具 #${event.currency_item_id}</p><details><summary>查看历史基础奖励</summary><div class="schedule-scroll"><table class="compare-table"><thead><tr><th>评级</th><th>普通 PT</th><th>普通徽章</th><th>挑战 PT</th><th>挑战徽章</th></tr></thead><tbody>${event.normal_rewards.map((row,index)=>{const challenge=event.challenge_rewards[index];return `<tr><td>${esc(row.rank)}</td><td>${fmt(row.event_pt_base)}</td><td>${fmt(row.shop_pt_base_guaranteed)}</td><td>${fmt(challenge.event_pt_base)}</td><td>${fmt(challenge.shop_pt_base_guaranteed)}</td></tr>`;}).join('')}</tbody></table></div></details><a href="${esc(event.url)}" target="_blank" rel="noreferrer">查看活动详情 ↗</a></article>`).join('');
   $('archiveCount').textContent=archives.profiles.length+' 份';
   $('archiveList').innerHTML=archives.profiles.map(p=>`<button class="archive-entry ${p.id===archives.active_id?'active':''}" data-profile="${esc(p.id)}"><span class="badge ${p.input.profile_kind==='plan'?'plan':''}">${p.input.is_demo?'合成示例':p.input.profile_kind==='plan'?'升级规划':'实际养成'}</span><strong>${esc(p.input.name)}</strong><p>${p.input.profile.inventory.members.length} 成员 · ${p.input.profile.inventory.snaps.length} 留影${p.id===archives.active_id?' · 使用中':''}</p></button>`).join('');
   $('archiveName').value=state.name;$('profileKind').value=state.profile_kind;$('profileKind').disabled=state.is_demo||!!jobId||evaluating||stale;
@@ -346,16 +356,16 @@ async function checkGrowth(){
 function gotoIssue(index){const issue=issues[index];if(issue.target==='card'){openEditor(issue.kind,issue.id);return;}growthBand=0;tab('growth');renderGrowth();const id=issue.target==='global'?(issue.field==='character_total_rank'?'totalRank':'tgwRank'):null;const el=id?$(id):$('growthFields').querySelector(`[data-${issue.target==='rank'?'rank':'facility'}="${issue.id}"]`);el?.scrollIntoView({behavior:'smooth',block:'center'});el?.focus();}
 function skillText(slot){return slot.live_effects.map(e=>`${e.effect_value/100}% × ${e.effective_activation_ms/1000} 秒${e.skill_effect_type===2004?'（PERFECT 目标 '+e.judgement_targets.filter(t=>t===5).length+' 项）':''}`).join('；');}
 function teamText(team,index){
-  const settings=result.settings,lines=[`Our Notes 配队 ${index+1} · ${team.reason}`,`档案：${resultInput.name}${resultInput.profile_kind==='plan'?'（升级规划）':resultInput.is_demo?'（合成示例）':''}`,`模式：${settings.mode==='normal'?'普通单人':'活动 1 挑战'}`,`综合力场景：${settings.music_attribute?types[settings.music_attribute]+'属性匹配，不含标签':'基础综合力，不含乐曲属性/标签'}`,`综合力：${team.power}`,`活动 PT 加成：${team.bonuses_10000.event_pt/100}%；活动徽章加成：${team.bonuses_10000.shop_pt/100}%`, ''];
+  const settings=result.settings,lines=[`Our Notes 配队 ${index+1} · ${team.reason}`,`档案：${resultInput.name}${resultInput.profile_kind==='plan'?'（升级规划）':resultInput.is_demo?'（合成示例）':''}`,`模式：${settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`}`,`综合力场景：${settings.music_attribute?types[settings.music_attribute]+'属性匹配，不含标签':'基础综合力，不含乐曲属性/标签'}`,`综合力：${team.power}`,`活动 PT 加成：${team.bonuses_10000.event_pt/100}%；活动徽章加成：${team.bonuses_10000.shop_pt/100}%`, ''];
   team.slots.forEach((slot,i)=>{const m=card('members',slot.member_id),s=card('snaps',slot.snap_id),mr=resultInput.profile.inventory.members.find(r=>r.id===m.id),sr=resultInput.profile.inventory.snaps.find(r=>r.id===s.id);lines.push(`${i+1}. 成员 #${m.id} ${m.title} / ${m.name}${m.id===team.leader_id?' [队长]':''}`,`   Lv.${mr.level}；特训 ${mr.training_count+1} 阶；觉醒 ${mr.awakening_count}；Live Lv.${slot.live_skill_level}：${skillText(slot)}`,`   Snap #${s.id} ${s.title} / ${s.name}；Lv.${sr.level}；突破 ${sr.limit_break_count}；延长 ${slot.extension_ms/1000} 秒`);});
-  lines.push('','显示位置用于成员与留影绑定，不代表技能触发顺序。', '在 bdon 按成员、留影和实际综合力设置重放。潜力指数不作为谱面分数。','基础快照 2026-10-01 + 成员 #64 · AP/PERFECT · 撃奏关闭',result.bdon_url);return lines.join('\n');
+  lines.push('','显示位置用于成员与留影绑定，不代表技能触发顺序。', '在 bdon 按成员、留影和实际综合力设置重放。潜力指数不作为谱面分数。',`数据快照 ${catalog.event.snapshot} · 活动 #${catalog.event.id} · AP/PERFECT · 撃奏关闭`,result.bdon_url);return lines.join('\n');
 }
 function teamMetrics(team,detail=false){return `<div class="team-metrics ${detail?'detail-metrics':''}"><div><strong>${fmt(team.power)}</strong><span>综合力</span></div><div><strong>${fmt(team.potential['120'])}</strong><span>综合潜力 · 120 秒参考</span></div><div><strong>${fmt(team.skill_percent_seconds)}</strong><span>技能积分 · %·秒</span></div><div class="bonus-metric"><strong>+${fmt(team.bonuses_10000.event_pt/100)}% / +${fmt(team.bonuses_10000.shop_pt/100)}%</strong><span>活动 PT / 徽章加成</span></div></div>`;}
 function resultCategory(team){return ['short','skill'].includes(team.selected_for)?'skill':['balanced','long','power'].includes(team.selected_for)?'balanced':team.selected_for;}
 function renderResult(go=true){
   $('emptyResult').hidden=true;$('results').hidden=false;$('resultCount').textContent=result.teams.length+' 套';
   $('resultTitle').textContent=result.status==='complete_fixed_team'?'指定队伍验算完成':`找到 ${result.teams.length} 套不同配队`;
-  $('resultHint').textContent=`${resultInput.name} · ${result.settings.mode==='normal'?'普通单人':'活动 1 挑战'} · ${result.settings.music_attribute?types[result.settings.music_attribute]+'匹配场景':'基础综合力场景'} · ${result.search.elapsed_seconds} 秒${result.search.cached_teams?' · 复用 '+result.search.cached_teams+' 套':''}${result.search.exhausted?' · 当前条件下没有更多卡组':''}`;
+  $('resultHint').textContent=`${resultInput.name} · ${result.settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`} · ${result.settings.music_attribute?types[result.settings.music_attribute]+'匹配场景':'基础综合力场景'} · ${result.search.elapsed_seconds} 秒${result.search.cached_teams?' · 复用 '+result.search.cached_teams+' 套':''}${result.search.exhausted?' · 当前条件下没有更多卡组':''}`;
   resultFilter='all';$('resultSort').value='recommended';renderTeamList();renderComparison();if(go){tab('output');window.scrollTo({top:0,behavior:'smooth'});}
   window.EventPages?.onResult();
 }
@@ -389,14 +399,14 @@ async function saveTeamImage(){
   try{
     const t=result.teams[detailIndex],canvas=document.createElement('canvas');canvas.width=1500;canvas.height=1010;const ctx=canvas.getContext('2d');
     ctx.fillStyle='#faf7fd';ctx.fillRect(0,0,1500,1010);ctx.fillStyle='#302b3c';ctx.font='bold 36px Microsoft YaHei';ctx.fillText('Our Notes · 队伍 '+(detailIndex+1)+' / '+t.reason,55,73);
-    ctx.font='21px Microsoft YaHei';ctx.fillStyle='#83728f';ctx.fillText(resultInput.name+' · '+(result.settings.mode==='normal'?'普通单人':'活动 1 挑战')+' · '+(result.settings.music_attribute?typeShort[result.settings.music_attribute]+'属性匹配':'基础综合力'),55,116);
+    ctx.font='21px Microsoft YaHei';ctx.fillStyle='#83728f';ctx.fillText(resultInput.name+' · '+(result.settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`)+' · '+(result.settings.music_attribute?typeShort[result.settings.music_attribute]+'属性匹配':'基础综合力'),55,116);
     ctx.fillStyle='#83539b';ctx.font='bold 30px Microsoft YaHei';ctx.fillText('综合力 '+fmt(t.power)+'     活动 PT +'+fmt(t.bonuses_10000.event_pt/100)+'%     徽章 +'+fmt(t.bonuses_10000.shop_pt/100)+'%',55,170);
-    const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('卡图加载失败，请重试'));img.src=src;});
+    const load=src=>new Promise((resolve,reject)=>{const img=new Image();let attempts=0;img.onload=()=>resolve(img);img.onerror=()=>{if(attempts>=2){reject(new Error('卡图加载失败，请重试'));return;}img.src=imageRetryUrl(src,++attempts);};img.src=src;});
     const images=await Promise.all(t.slots.flatMap(slot=>[load(card('members',slot.member_id).thumbnail),load(card('snaps',slot.snap_id).thumbnail)]));
     function art(img,x,y,w,h){const ratio=Math.min(w/img.width,h/img.height);ctx.drawImage(img,x+(w-img.width*ratio)/2,y+(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
     function wrap(text,x,y,width,maxLines=3){let line='',lines=0;for(const ch of text){if(ctx.measureText(line+ch).width>width){if(lines+1===maxLines){while(ctx.measureText(line+'…').width>width)line=line.slice(0,-1);ctx.fillText(line+'…',x,y);return y+26;}ctx.fillText(line,x,y);y+=26;line=ch;lines++;}else line+=ch;}if(line){ctx.fillText(line,x,y);y+=26;}return y;}
     t.slots.forEach((slot,i)=>{const x=55+i*280,m=card('members',slot.member_id),s=card('snaps',slot.snap_id);ctx.fillStyle='white';ctx.fillRect(x,210,266,677);art(images[i*2],x+12,229,242,286);ctx.fillStyle='#342e3f';ctx.font='bold 19px Microsoft YaHei';let y=wrap((m.id===t.leader_id?'队长 · ':'')+m.title,x+12,541,242,2);ctx.font='17px Microsoft YaHei';ctx.fillStyle='#81708e';wrap('#'+m.id+' · '+m.name,x+12,y+3,242,1);art(images[i*2+1],x+12,618,242,126);ctx.fillStyle='#342e3f';ctx.font='17px Microsoft YaHei';wrap('Snap #'+s.id+' · '+s.title,x+12,765,242,2);ctx.fillStyle='#81708e';ctx.font='16px Microsoft YaHei';wrap('Live Lv.'+slot.live_skill_level+' · '+skillText(slot),x+12,829,242,2);});
-    ctx.font='19px Microsoft YaHei';ctx.fillStyle='#82728f';ctx.fillText('基础快照 2026-10-01 + 成员 #64 · AP/PERFECT · 撃奏关闭 · 绑定位置不代表技能触发顺序',55,931);ctx.fillText('配队参考，实际歌曲出分请核对：https://bdon.moe/tools/chart-data',55,969);
+    ctx.font='19px Microsoft YaHei';ctx.fillStyle='#82728f';ctx.fillText(`数据快照 ${catalog.event.snapshot} · 活动 #${catalog.event.id} · AP/PERFECT · 撃奏关闭 · 绑定位置不代表技能触发顺序`,55,931);ctx.fillText('配队参考，实际歌曲出分请核对：https://bdon.moe/tools/chart-data',55,969);
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('图片生成失败');downloadBlob(blob,resultInput.name+'-队伍'+(detailIndex+1)+'.png');$('imageHint').textContent='队伍图片已保存。';
   }catch(e){$('imageHint').textContent=e.message;}
 }

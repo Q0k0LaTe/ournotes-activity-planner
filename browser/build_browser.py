@@ -17,7 +17,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT / "tools"))
 from optimized_sources import sources
-from card_updates import card_overrides, copy_card_images
+from game_updates import game_overrides, copy_game_images
 PUBLIC = HERE / "public"
 VERSION = json.loads((HERE / "package.json").read_text("utf-8"))["version"]
 
@@ -55,7 +55,7 @@ def main():
     included = []
     overrides = sources()
     with zipfile.ZipFile(source) as archive, zipfile.ZipFile(payload, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as runtime:
-        data_overrides, card_patch = card_overrides(archive, prefix)
+        data_overrides, game_patch = game_overrides(archive, prefix)
         for info in archive.infolist():
             relative = info.filename.removeprefix(prefix)
             if relative == info.filename or ".." in Path(relative).parts:
@@ -84,7 +84,11 @@ def main():
             if name not in included:
                 add_runtime(runtime, name, raw)
                 included.append(name)
-    copy_card_images(PUBLIC, card_patch)
+        for name, raw in data_overrides.items():
+            if name not in included:
+                add_runtime(runtime, name, raw)
+                included.append(name)
+    copy_game_images(PUBLIC, game_patch)
     (PUBLIC / "planner-runtime.zip").write_bytes(payload.getvalue())
     pyodide = HERE / "node_modules/pyodide"
     destination = PUBLIC / "vendor/pyodide"
@@ -110,7 +114,7 @@ def main():
     html = replace_once(html, '<link rel="stylesheet" href="/style.css"><script src="/event-math.js" defer></script><script src="/event-extra.js" defer></script><script src="/app.js" defer></script>',
                         '<link rel="stylesheet" href="./style.css"><script src="./event-math.js" defer></script><script src="./event-extra.js" defer></script><script type="module" src="./main.js"></script>')
     html = replace_once(html, '<head>', '<head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-eval\'; worker-src \'self\' blob:; img-src \'self\' data: blob:; connect-src \'self\'; object-src \'none\'; base-uri \'self\';">')
-    html = html.replace('本地版 0.3.0', '网页版 ' + VERSION).replace('本地测试', '浏览器计算')
+    html = html.replace('本地版 0.3.1', '网页版 ' + VERSION).replace('本地测试', '浏览器计算')
     html = html.replace('独立测试版不会覆盖线上网页。', '本版本发布后项目暂停维护，数据不会自动更新。')
     html = html.replace('<button id="exit" class="secondary">退出本地程序</button>', '<button id="exit" hidden>退出</button>')
     html = replace_once(html, '<div id="loadError"', '<div id="browserLoading" class="notice" role="status">正在准备计算组件…</div><div id="loadError"')
@@ -129,9 +133,9 @@ def main():
     report = {"browser_version": VERSION, "core_version": core_version,
               "optimizer_revision": 2,
               "core_overrides": {name: hashlib.sha256(raw).hexdigest() for name, raw in overrides.items()},
-              "card_update": {"id": card_patch["update_id"], "source_commit": card_patch["source_commit"],
-                              "member_ids": card_patch["member_ids"],
-                              "payload_sha256": hashlib.sha256((ROOT / "data_updates/2026-10-03/member-64.json").read_bytes()).hexdigest()},
+              "game_update": {"id": game_patch["update_id"], "source_commit": game_patch["source_commit"],
+                              "event_id": game_patch["active_event_id"],
+                              "payload_sha256": hashlib.sha256((ROOT / "data_updates/2026-10-09/manifest.json").read_bytes()).hexdigest()},
               "public_source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
               "runtime_sha256": hashlib.sha256(payload.getvalue()).hexdigest(),
               "python_runtime": "Pyodide 314.0.7", "solver": "or-tools-wasm 0.9.1",

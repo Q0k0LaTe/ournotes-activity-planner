@@ -6,7 +6,7 @@ import unittest
 from baseline import load_baseline
 
 destination = Path(sys.argv[1]).resolve()
-p = load_baseline(destination / "power-modes")
+p = load_baseline(destination / "power-modes", optimized=True)
 from test_power_modes import PowerModeTests
 
 result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(PowerModeTests))

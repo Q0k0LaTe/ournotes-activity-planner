@@ -29,13 +29,13 @@ def load_baseline(destination, *, optimized=False):
     if optimized:
         sys.path.insert(0, str(here.parent / "tools"))
         from optimized_sources import sources
-        from card_updates import card_overrides
+        from game_updates import game_overrides
         for name, raw in sources().items():
             target = native / name
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(raw)
         with zipfile.ZipFile(source) as archive:
-            updated_tables, _ = card_overrides(archive, prefix)
+            updated_tables, _ = game_overrides(archive, prefix)
         for name, raw in updated_tables.items():
             target = native / name
             target.parent.mkdir(parents=True, exist_ok=True)

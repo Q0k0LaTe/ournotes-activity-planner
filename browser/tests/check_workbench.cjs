@@ -17,12 +17,16 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  try{
   await page.goto(BASE);await ready(page);assert.equal(await page.locator('#ownedCount').textContent(),'0 + 0');
+  assert.match(await page.locator('.page-heading .eyebrow').first().textContent(),/活动 #2/);
+  await page.locator('[data-tab="archive"]').click();
+  assert.match(await page.locator('#eventArchiveList').textContent(),/爱的奔流 AtoZ/);
+  assert.equal(await page.locator('#eventArchiveList tbody tr').count(),6);
   await page.locator('[data-tab="inventory"]').click();
   for(const kind of ['members','snaps']){
     await page.locator(`[data-kind-tab="${kind}"]`).click();
     assert.equal(await page.locator('#cardStatus').inputValue(),'all');
-    assert.equal(await page.locator('#catalogCount').textContent(),'显示 64 / 64 张卡牌');
-    for(const [rarity,count] of [['2',25],['3',26]]){
+    assert.equal(await page.locator('#catalogCount').textContent(),kind==='members'?'显示 67 / 67 张卡牌':'显示 68 / 68 张卡牌');
+    for(const [rarity,count] of [['2',25],['3',27]]){
       await page.locator('#cardRarity').selectOption(rarity);
       assert.equal(await page.locator('#cardCatalog article').count(),count);
       if(kind==='members'&&rarity==='3')for(const id of [27,28,30,33])
@@ -38,10 +42,11 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.locator('[data-tab="eventPlan"]').click();assert.equal(await page.locator('#planNormalPt').inputValue(),'');
   await page.locator('#profileSelect').selectOption(originalProfile);assert.equal(await page.locator('#planNormalPt').inputValue(),'123');
   await page.locator('[data-tab="archive"]').click();await page.locator('#sample').click();
+  assert.equal(await page.locator('#ownedCount').textContent(),'6 + 10');
   await page.locator('[data-tab="inventory"]').click();
   await page.locator('[data-kind-tab="members"]').click();
   assert.equal(await page.locator('#cardStatus').inputValue(),'all');
-  assert.equal(await page.locator('#catalogCount').textContent(),'显示 64 / 64 张卡牌');
+  assert.equal(await page.locator('#catalogCount').textContent(),'显示 67 / 67 张卡牌');
   for(const id of [27,28,30,33])
     assert.equal(await page.locator(`#cardCatalog [data-edit="members"][data-id="${id}"]`).count(),1);
   await page.locator('[data-tab="plan"]').click();
@@ -65,7 +70,7 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.locator('#profileSelect').selectOption(sampleId);
   reports.push('hypothetical max-upgrade profile keeps the actual inventory unchanged');
   await page.locator('[data-tab="growth"]').click();
-  await page.locator('[data-facility="405"]').fill('0');
+  await page.locator('[data-facility="501"]').fill('0');
   await page.locator('[data-tab="plan"]').click();await page.screenshot({path:path.join(DEST,'workbench-plan.png'),fullPage:true});
   await page.locator('#checkGrowth').click();
   await page.waitForFunction(()=>document.getElementById('growthIssues').textContent.trim());
@@ -143,9 +148,9 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.evaluate(id=>window.Planner.request('/api/jobs/'+id+'/cancel',{body:'{}'}),id);
   await waitJob(page,id,j=>j.status!=='running',30000);
   const resumed=await job(page,resume);assert.equal(resumed.teams.length,15);assert.ok(resumed.search.cached_teams>=1);
-  reports.push('infeasible floor, full 63/64 pool cancellation, saved-row resume');console.log(reports.at(-1));
+  reports.push('infeasible floor, full 67/68 pool cancellation, saved-row resume');console.log(reports.at(-1));
   const second=await context.newPage();await second.goto(BASE);await ready(second);await page.locator('[data-tab="archive"]').click();await page.locator('#archiveName').fill('最新档案');await page.locator('#archiveName').dispatchEvent('change');await second.waitForFunction(()=>document.getElementById('inputArea').disabled);assert.ok((await second.locator('#message').textContent()).includes('另一标签页'));await second.close();
-  const migration=await browser.newContext();await migration.addInitScript(({input,scope})=>{if(!localStorage.getItem('migration-seeded')){localStorage.setItem('ournotes-browser-planner-v1-profile:'+scope,JSON.stringify(input));localStorage.setItem('migration-seeded','yes');}},{input:native.input,scope:new URL(BASE).pathname});const old=await migration.newPage();await old.goto(BASE);await ready(old);assert.equal(await old.locator('#ownedCount').textContent(),'5 + 10');await old.locator('[data-tab="archive"]').click();await old.locator('#copyProfile').click();assert.equal(await old.locator('#profileSelect option').count(),2);await migration.close();
+  const migration=await browser.newContext();await migration.addInitScript(({input,scope})=>{if(!localStorage.getItem('migration-seeded')){localStorage.setItem('ournotes-browser-planner-v1-profile:'+scope,JSON.stringify(input));localStorage.setItem('migration-seeded','yes');}},{input:native.input,scope:new URL(BASE).pathname});const old=await migration.newPage();await old.goto(BASE);await ready(old);assert.equal(await old.locator('#ownedCount').textContent(),'6 + 10');await old.locator('[data-tab="archive"]').click();await old.locator('#copyProfile').click();assert.equal(await old.locator('#profileSelect option').count(),2);await migration.close();
   reports.push('cross-tab protection, old library migration and separate planning profile');
   assert.deepEqual(errors,[]);fs.writeFileSync(path.join(DEST,'workbench-report.json'),JSON.stringify({passed:true,reports,errors},null,2));console.log(JSON.stringify({passed:true,reports}));
  }catch(e){await page.screenshot({path:path.join(DEST,'workbench-failure.png'),fullPage:true}).catch(()=>{});fs.writeFileSync(path.join(DEST,'workbench-report.json'),JSON.stringify({passed:false,error:e.message,reports,errors},null,2));throw e;}finally{await browser.close();}

@@ -1,0 +1,101 @@
+{
+  "converter_commit": "b1e12c4ab31cfed6cd453e562aeeb66c3821af83",
+  "charts": [
+    {
+      "score_id": 10011100,
+      "music_id": 100111,
+      "difficulty": "easy",
+      "source_sha256": "719bf4285efd08ff3547e136f102c3e5b4f87030bd607d7c249c261fac3adf36",
+      "saved_path": "normalized/converted_charts/100111/easy.json",
+      "converted_record_sha256": "3000a754777d12c230a2d5c7e2c5afa7ce730115307c130b62cb332fa32266d5",
+      "judgement_count": 225,
+      "score_denominator": 94,
+      "score_percent_sum_i32": 9360,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011101,
+      "music_id": 100111,
+      "difficulty": "normal",
+      "source_sha256": "90eb0c3510b1d5b161a8d1f27c00ab8a9caa219d2e0a00e0ae42ade9c099d132",
+      "saved_path": "normalized/converted_charts/100111/normal.json",
+      "converted_record_sha256": "06570418a3e7f36eac119a7d7a4135843846423b5e8bed2da4e7c8a4509a9a65",
+      "judgement_count": 571,
+      "score_denominator": 280,
+      "score_percent_sum_i32": 27940,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011102,
+      "music_id": 100111,
+      "difficulty": "hard",
+      "source_sha256": "f984fcdbfc64887c9717fcc488627e836cc210e86ea0de5d03e9b3cd47f3b056",
+      "saved_path": "normalized/converted_charts/100111/hard.json",
+      "converted_record_sha256": "5da51ab640fab8145bb3091ffedca89cbba2a244df863b9838df3ac35b0c2580",
+      "judgement_count": 731,
+      "score_denominator": 467,
+      "score_percent_sum_i32": 46640,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011103,
+      "music_id": 100111,
+      "difficulty": "expert",
+      "source_sha256": "b3671b5f862f6c658b30f1264ebba36c9b2f0216e4816a7ab8373f2bd7be37a8",
+      "saved_path": "normalized/converted_charts/100111/expert.json",
+      "converted_record_sha256": "96ae39dc9478771357fbb70f5c6324816be8b48ed5c6e8ea58c6b80ac911d6ef",
+      "judgement_count": 965,
+      "score_denominator": 618,
+      "score_percent_sum_i32": 61760,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011200,
+      "music_id": 100112,
+      "difficulty": "easy",
+      "source_sha256": "424656a311ef1b4db5dd19ce34d158ee1723b455b1535ee59955b82659e792db",
+      "saved_path": "normalized/converted_charts/100112/easy.json",
+      "converted_record_sha256": "eebee6901a150eb26b9fca552500a09c3afca44f6dcbc37475e40579ae43f24f",
+      "judgement_count": 323,
+      "score_denominator": 131,
+      "score_percent_sum_i32": 13040,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011201,
+      "music_id": 100112,
+      "difficulty": "normal",
+      "source_sha256": "3223d39f74fb1c7a2df0d87c2bc4719e67760d514a1a764091fb83f5b198b688",
+      "saved_path": "normalized/converted_charts/100112/normal.json",
+      "converted_record_sha256": "e635d1d63094b44cf7e3073504bc5fc5eb9820ea134a71709975eddf3550659f",
+      "judgement_count": 664,
+      "score_denominator": 414,
+      "score_percent_sum_i32": 41380,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011202,
+      "music_id": 100112,
+      "difficulty": "hard",
+      "source_sha256": "c9bdace86bb6604b350823679cc8cb7935a64aeca1c9b066392d57ececd19c6c",
+      "saved_path": "normalized/converted_charts/100112/hard.json",
+      "converted_record_sha256": "73b656fdb646bc3a8348a22e45f2d29537d74919f6eb59fe969cdcacf2862fb0",
+      "judgement_count": 917,
+      "score_denominator": 660,
+      "score_percent_sum_i32": 65960,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011203,
+      "music_id": 100112,
+      "difficulty": "expert",
+      "source_sha256": "dee406e9db72a3b0fc3a909e43e827bcbb8c522ed3d5e7e9d75f6fa07f1c94e5",
+      "saved_path": "normalized/converted_charts/100112/expert.json",
+      "converted_record_sha256": "4dc23ec001c674ff654d7be4fdafd6dcb4c1b91c8324380e1a8e99076d0fead0",
+      "judgement_count": 1144,
+      "score_denominator": 909,
+      "score_percent_sum_i32": 90820,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    }
+  ]
+}

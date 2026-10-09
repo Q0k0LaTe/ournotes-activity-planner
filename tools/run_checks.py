@@ -30,16 +30,17 @@ try:
     if not line.startswith("Static preview:"):
         raise RuntimeError("Static preview did not start: " + preview.stderr.read())
     print(line.strip(), flush=True)
-    for name in ("check_workbench.cjs", "check_int64.cjs"):
+    for name in ("check_workbench.cjs", "check_int64.cjs", "check_images.cjs"):
         run(["node", str(ROOT / "browser/tests" / name), str(dest)])
     reports = {name: json.loads((dest / f"{name}-report.json").read_text("utf-8"))
-               for name in ("workbench", "int64", "power-modes")}
+               for name in ("workbench", "int64", "images", "power-modes")}
     if not all(report["passed"] for report in reports.values()):
         raise RuntimeError("One or more checks failed")
     summary = {"passed": True, "browser_version": json.loads((ROOT / "browser/package.json").read_text("utf-8"))["version"],
                "core_version": '0.2.5',
                "browser_checks": reports["workbench"]["reports"],
                "int64": reports["int64"],
+               "images": reports["images"],
                "power_modes": reports["power-modes"],
                "real_mobile_device_verified": False}
     (dest / "validation-summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), "utf-8")
