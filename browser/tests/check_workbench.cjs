@@ -25,7 +25,7 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   for(const kind of ['members','snaps']){
     await page.locator(`[data-kind-tab="${kind}"]`).click();
     assert.equal(await page.locator('#cardStatus').inputValue(),'all');
-    assert.equal(await page.locator('#catalogCount').textContent(),kind==='members'?'显示 67 / 67 张卡牌':'显示 68 / 68 张卡牌');
+    assert.equal(await page.locator('#catalogCount').textContent(),kind==='members'?'显示 67 / 67 张卡牌':'显示 69 / 69 张卡牌');
     for(const [rarity,count] of [['2',25],['3',27]]){
       await page.locator('#cardRarity').selectOption(rarity);
       assert.equal(await page.locator('#cardCatalog article').count(),count);
@@ -34,7 +34,23 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
     }
     await page.locator('#clearFilters').click();
   }
+  await page.locator('[data-kind-tab="snaps"]').click();
+  await page.locator('#cardSearch').fill('Abracadabra');
+  assert.equal(await page.locator('#cardCatalog article').count(),1);
+  assert.match(await page.locator('#cardCatalog article').textContent(),/Ave Mujica · #70/);
+  await page.locator('#cardCatalog img[src*="snaps-70.webp"]').evaluate(img=>img.loading='eager');
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('#cardCatalog img[src*="snaps-70.webp"]');
+    return img?.complete&&img.naturalWidth>0;
+  });
+  await page.locator('#cardCatalog [data-add="snaps"][data-id="70"]').click();
+  assert.equal(await page.locator('#ownedCount').textContent(),'0 + 1');
+  await page.locator('#cardEditor [data-close="cardEditor"]').first().click();
+  await page.locator('#cardCatalog [data-remove="snaps"][data-id="70"]').click();
+  assert.equal(await page.locator('#ownedCount').textContent(),'0 + 0');
+  await page.locator('#clearFilters').click();
   reports.push('wiki R/SR cards are visible in both complete catalogues');
+  reports.push('Abracadabra EX Snapshot is searchable, pictured, and can be recorded');
   assert.equal(await page.locator('#simSong,#simDifficulty').count(),2);
   const originalProfile=await page.locator('#profileSelect').inputValue();
   await page.locator('[data-tab="eventPlan"]').click();await page.locator('#planNormalPt').fill('123');
@@ -148,7 +164,7 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.evaluate(id=>window.Planner.request('/api/jobs/'+id+'/cancel',{body:'{}'}),id);
   await waitJob(page,id,j=>j.status!=='running',30000);
   const resumed=await job(page,resume);assert.equal(resumed.teams.length,15);assert.ok(resumed.search.cached_teams>=1);
-  reports.push('infeasible floor, full 67/68 pool cancellation, saved-row resume');console.log(reports.at(-1));
+  reports.push('infeasible floor, full 67/69 pool cancellation, saved-row resume');console.log(reports.at(-1));
   const second=await context.newPage();await second.goto(BASE);await ready(second);await page.locator('[data-tab="archive"]').click();await page.locator('#archiveName').fill('最新档案');await page.locator('#archiveName').dispatchEvent('change');await second.waitForFunction(()=>document.getElementById('inputArea').disabled);assert.ok((await second.locator('#message').textContent()).includes('另一标签页'));await second.close();
   const migration=await browser.newContext();await migration.addInitScript(({input,scope})=>{if(!localStorage.getItem('migration-seeded')){localStorage.setItem('ournotes-browser-planner-v1-profile:'+scope,JSON.stringify(input));localStorage.setItem('migration-seeded','yes');}},{input:native.input,scope:new URL(BASE).pathname});const old=await migration.newPage();await old.goto(BASE);await ready(old);assert.equal(await old.locator('#ownedCount').textContent(),'6 + 10');await old.locator('[data-tab="archive"]').click();await old.locator('#copyProfile').click();assert.equal(await old.locator('#profileSelect option').count(),2);await migration.close();
   reports.push('cross-tab protection, old library migration and separate planning profile');

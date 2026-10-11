@@ -3,6 +3,7 @@
 from pathlib import Path
 import hashlib
 import json
+from snap_updates import apply_snap_update, copy_snap_image
 
 ROOT = Path(__file__).resolve().parents[1]
 UPDATE = ROOT / "data_updates/2026-10-09"
@@ -59,6 +60,7 @@ def game_overrides(archive, prefix):
     manifest["game_updates"] = [{"update_id": patch["update_id"], "source_commit": patch["source_commit"],
                                   "active_event_id": patch["active_event_id"]}]
     manifest.pop("card_updates", None)
+    snap_patch = apply_snap_update(overrides, manifest, entries)
     overrides[manifest_path] = _json_bytes(manifest)
     normalized = json.loads((UPDATE / "event_2.json").read_text(encoding="utf-8"))
     if normalized["event_id"] != patch["active_event_id"]:
@@ -75,6 +77,7 @@ def game_overrides(archive, prefix):
         if hashlib.sha256(payload).hexdigest() != chart["converted_record_sha256"]:
             raise ValueError(f"Converted chart checksum mismatch: {path}")
         overrides[BASE_SNAPSHOT + path] = payload
+    patch["snap_update"] = snap_patch
     return overrides, patch
 
 
@@ -97,3 +100,4 @@ def copy_game_images(destination, patch):
         target.write_bytes(payload)
         manifest["images"].append({**row, "bytes": len(payload)})
     manifest_path.write_bytes(_json_bytes(manifest))
+    copy_snap_image(destination, patch["snap_update"])

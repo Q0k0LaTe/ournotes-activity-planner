@@ -20,6 +20,9 @@ def verify(site):
         raise ValueError("Public baseline SHA-256 mismatch")
     if (info["browser_version"], info["core_version"], info["public_source_sha256"]) != (package["version"], config["version"], config["sha256"]):
         raise ValueError("Site version or baseline differs from source")
+    card_patch = ROOT / "data_updates/2026-10-11/snap-70.json"
+    if info["card_update"]["payload_sha256"] != hashlib.sha256(card_patch.read_bytes()).hexdigest():
+        raise ValueError("Abracadabra update differs from source")
     files = {p.relative_to(site).as_posix(): p for p in site.rglob("*") if p.is_file()}
     for name, digest in info["static_files"].items():
         if name not in files or hashlib.sha256(files[name].read_bytes()).hexdigest() != digest:

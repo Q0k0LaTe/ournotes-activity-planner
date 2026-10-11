@@ -21,7 +21,7 @@ import planner_core as p
 import solver_search as upstream_solver
 from ortools.sat.python import cp_model
 
-VERSION = '0.3.1'
+VERSION = '0.3.2'
 SCHEMA = 1
 BDON = 'https://bdon.moe/tools/chart-data'
 KINDS = {

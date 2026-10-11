@@ -17,16 +17,23 @@ class CardUpdateTests(unittest.TestCase):
 
     def test_birthday_member_is_in_catalog_and_usable_as_leader(self):
         catalog = teams.workbench_catalog(self.data)
-        self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (67, 68))
+        self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (67, 69))
         for kind, last in (('members', 67), ('snaps', 68)):
             cards = catalog[kind]
-            self.assertEqual({c['id'] for c in cards}, set(range(1, last + 1)))
+            expected = set(range(1, last + 1)) | ({70} if kind == 'snaps' else set())
+            self.assertEqual({c['id'] for c in cards}, expected)
             self.assertEqual(sum(c['rarity'] == 2 for c in cards), 25)
             self.assertEqual(sum(c['rarity'] == 3 for c in cards), 27)
         self.assertEqual([c['title'] for c in catalog['members'] if c['id'] in (65, 66, 67)],
                          ['薄明を裂いて', '光芒に立つ', '笑み、暗がりにて'])
         self.assertEqual([c['title'] for c in catalog['snaps'] if c['id'] in (65, 66, 67, 68)],
                          ['赤橙の中', 'きみのため', '光、手をかざして', 'DIMENSIONAL OVERLAP'])
+        snap = next(c for c in catalog['snaps'] if c['id'] == 70)
+        self.assertEqual((snap['name'], snap['title'], snap['rarity'], snap['type'], snap['character_ids'], snap['caps']),
+                         ('Ave Mujica', 'Abracadabra', 10, 1, [6, 7, 8, 9, 10], [50, 60, 70, 80, 90]))
+        self.assertIn('snaps-70.webp', snap['thumbnail'])
+        self.assertEqual((self.data.index['MasterSupportCard'][70]['_supportSkillId01'],
+                          self.data.index['MasterSupportCard'][70]['_supportSkillId02']), (71, 73))
         for identifier, title in ((27, 'きらめくステージ'), (28, 'おもしれー音'),
                                   (30, '一途な律動'), (33, '盤石の低音')):
             card = next(c for c in catalog['members'] if c['id'] == identifier)
@@ -46,6 +53,11 @@ class CardUpdateTests(unittest.TestCase):
                                  'snap_ids': request['candidate_snap_ids'][:5], 'leader_id': 64}
         result = teams.evaluate(request, self.data)
         self.assertEqual(result['status'], 'complete_fixed_team')
+
+        request['candidate_snap_ids'][0] = 70
+        request['profile']['inventory']['snaps'][0]['id'] = 70
+        request['fixed_team']['snap_ids'][0] = 70
+        self.assertEqual(teams.evaluate(request, self.data)['status'], 'complete_fixed_team')
 
 
 if __name__ == '__main__':

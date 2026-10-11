@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "update_id": "en-2026-10-11-snap-70",
+  "base_data_commit": "29b2365a5ed294b4a517a9109c3cfa5ca89125f1",
+  "source_repository": "StarMoe-org/moenotes-masterdata",
+  "source_commit": "dfcb4787b7c376a321838336babe59af69b66e39",
+  "source_path": "en",
+  "snap_ids": [
+    70
+  ],
+  "tables": {
+    "MasterSupportCard": {
+      "source_sha256": "6f0e4a7ccf93d0f77dca178e8846fc204fc8b89d54609a7c4f0f60bf7f22300f",
+      "source_blob_sha": "410760ec1bd39daf63eee108ab238bc19d7dc569",
+      "rows": [
+        {
+          "_id": 70,
+          "_assetID": 70,
+          "_nameTextID": "Snap_Name_mujica",
+          "_descriptionTextID": "SupportSubtitle_70",
+          "_diaryTextID": "",
+          "_diarySoundId": 0,
+          "_characterIDs": [
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "_rarity": 10,
+          "_cardType": 1,
+          "_performancePowerMax": 1300,
+          "_technicPowerMax": 1400,
+          "_visualPowerMax": 1200,
+          "_supportCardLevelGroup": 5,
+          "_supportCardRankGroup": 5,
+          "_supportSkillId01": 71,
+          "_supportSkillId02": 73,
+          "_gekisouSupportSkillId01": 0,
+          "_gekisouSupportSkillId02": 0,
+          "_startAt": "2026-09-24 0:00:00"
+        }
+      ]
+    },
+    "MasterText": {
+      "source_sha256": "fc429eed1ca516b231bab71f80682452b49af721d23196f6abbaf60efa1634e2",
+      "source_blob_sha": "2a580056369f6c160aa3107f78751c9dd8166cfa",
+      "rows": [
+        {
+          "_id": "SupportSubtitle_70",
+          "_japanese": "Abracadabra",
+          "_english": "Abracadabra",
+          "_traditionalChinese": "Abracadabra",
+          "_simplifiedChinese": "Abracadabra",
+          "_korean": "Abracadabra"
+        }
+      ]
+    }
+  },
+  "thumbnail": {
+    "file": "snaps-70.webp",
+    "source_url": "https://assets.bdon.moe/en/en/SupportCard/70/snap_thumbnail/snap_thumbnail.webp",
+    "sha256": "a03c22aa4f775fe6be17c7880ccaee4a4c5f75c56943f42476f91c7535156a0e",
+    "bytes": 194390
+  }
+}

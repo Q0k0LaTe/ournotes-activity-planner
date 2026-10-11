@@ -114,7 +114,7 @@ def main():
     html = replace_once(html, '<link rel="stylesheet" href="/style.css"><script src="/event-math.js" defer></script><script src="/event-extra.js" defer></script><script src="/app.js" defer></script>',
                         '<link rel="stylesheet" href="./style.css"><script src="./event-math.js" defer></script><script src="./event-extra.js" defer></script><script type="module" src="./main.js"></script>')
     html = replace_once(html, '<head>', '<head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' \'unsafe-eval\'; worker-src \'self\' blob:; img-src \'self\' data: blob:; connect-src \'self\'; object-src \'none\'; base-uri \'self\';">')
-    html = html.replace('本地版 0.3.1', '网页版 ' + VERSION).replace('本地测试', '浏览器计算')
+    html = html.replace('本地版 0.3.2', '网页版 ' + VERSION).replace('本地测试', '浏览器计算')
     html = html.replace('独立测试版不会覆盖线上网页。', '本版本发布后项目暂停维护，数据不会自动更新。')
     html = html.replace('<button id="exit" class="secondary">退出本地程序</button>', '<button id="exit" hidden>退出</button>')
     html = replace_once(html, '<div id="loadError"', '<div id="browserLoading" class="notice" role="status">正在准备计算组件…</div><div id="loadError"')
@@ -136,6 +136,9 @@ def main():
               "game_update": {"id": game_patch["update_id"], "source_commit": game_patch["source_commit"],
                               "event_id": game_patch["active_event_id"],
                               "payload_sha256": hashlib.sha256((ROOT / "data_updates/2026-10-09/manifest.json").read_bytes()).hexdigest()},
+              "card_update": {"id": game_patch["snap_update"]["update_id"],
+                              "source_commit": game_patch["snap_update"]["source_commit"],
+                              "payload_sha256": hashlib.sha256((ROOT / "data_updates/2026-10-11/snap-70.json").read_bytes()).hexdigest()},
               "public_source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
               "runtime_sha256": hashlib.sha256(payload.getvalue()).hexdigest(),
               "python_runtime": "Pyodide 314.0.7", "solver": "or-tools-wasm 0.9.1",

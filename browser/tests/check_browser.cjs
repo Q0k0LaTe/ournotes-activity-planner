@@ -81,7 +81,7 @@ function compare(actual, expected) {
       await page.screenshot({path:path.join(DEST,'browser-'+width+'.png'),fullPage:true});
     }
     await page.locator('[data-tab="inventory"]').click();
-    for(const [kind,count] of [['members',67],['snaps',68]]) {
+    for(const [kind,count] of [['members',67],['snaps',69]]) {
       await page.locator('#addKind').selectOption(kind);
       await page.locator('#cardCatalog .card-art img').evaluateAll(images=>images.forEach(img=>img.loading='eager'));
       await page.waitForFunction(expected=>{

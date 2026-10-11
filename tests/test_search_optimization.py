@@ -120,7 +120,7 @@ class LargePoolTests(unittest.TestCase):
             plan=output["plans"][objective]
             self.assertEqual(plan["totals"],p.cycle(plan["normal"]["per_live"],plan["challenge"]["per_live"],20,4,0,200))
 
-    def test_skip_all_68_snaps_finishes_above_old_70000_cap(self):
+    def test_skip_all_69_snaps_finishes_above_old_70000_cap(self):
         request=fixture(self.data)
         request["candidate_snap_ids"]=list(self.data.index["MasterSupportCard"])
         owned=p.cp._inventory(request["profile"],"snaps")
@@ -129,10 +129,10 @@ class LargePoolTests(unittest.TestCase):
             request["settings"][mode].update(method="skip",sheets=[{"song_id":100111,"difficulty":"expert"}])
         out=p.optimize(request,data=self.data)
         self.assertTrue(out["search"]["complete"])
-        self.assertEqual(out["search"]["counts"]["normal"]["evaluated_bindings"],10424128)
+        self.assertEqual(out["search"]["counts"]["normal"]["evaluated_bindings"],11238513)
         self.assertLess(out["search"]["counts"]["normal"]["optimization"]["score_evaluations"],1000)
 
-    def test_full_67_member_68_snap_pool_starts_lazily_and_cancels_with_a_cursor(self):
+    def test_full_67_member_69_snap_pool_starts_lazily_and_cancels_with_a_cursor(self):
         request=fixture(self.data)
         catalog=self.data.catalog()
         request["profile"]={"schema_version":1,

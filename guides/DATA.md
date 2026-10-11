@@ -7,11 +7,11 @@ OurNotes-配队程序-v0.2.5.zip
 SHA-256: 396a5b670f8e15f7ce3e5582ca9ed114658d40de801f9d7233351027888ca914
 基础归档: 2026-10-01，活动 #1；当前 Master 增量: 2026-10-09
 当前活动 ID: 2；活动 #1 基础奖励保留为历史记录
-成员卡: 67；Snap: 68
+成员卡: 67；Snap: 69（含国际服 #70）
 歌曲: 87（转换谱面 348）；活动配队不指定歌曲，歌曲模拟使用这些谱面
 ```
 
-基础 ZIP 位于 `browser/upstream/`，不改动其原始字节。构建先验证基础 SHA-256，再叠加 `data_updates/2026-10-09/` 中固定哈希的 Master 表、卡图与谱面。71 份运行 Master 表逐字节对应本次固定来源提交；旧活动的 `normalized/event_1.json` 仍保留。优化层的八个源码文件及其 SHA-256 另记录在 `build-info.json` 的 `core_overrides` 中；运行包必须逐字节匹配这些文件。公开包不含原玩家卡库、私人养成观察、截图结算或 SQLite；初始化时使用空白个人卡库。测试生成器只使用合成养成。
+基础 ZIP 位于 `browser/upstream/`，不改动其原始字节。构建先验证基础 SHA-256，再叠加 `data_updates/2026-10-09/` 中固定哈希的日服 Master 表、卡图与谱面，然后从 `data_updates/2026-10-11/` 补入国际服留影 #70 的卡片行、标题与缩略图。其余运行 Master 表逐字节对应 10 月 9 日固定来源提交；旧活动的 `normalized/event_1.json` 仍保留。优化层的八个源码文件及其 SHA-256 另记录在 `build-info.json` 的 `core_overrides` 中；运行包必须逐字节匹配这些文件。公开包不含原玩家卡库、私人养成观察、截图结算或 SQLite；初始化时使用空白个人卡库。测试生成器只使用合成养成。
 
 ## 来源
 
@@ -19,6 +19,7 @@ SHA-256: 396a5b670f8e15f7ce3e5582ca9ed114658d40de801f9d7233351027888ca914
 | --- | --- |
 | Master 数据 | [StarMoe-org/moenotes-masterdata](https://github.com/StarMoe-org/moenotes-masterdata)，当前 `29b2365a5ed294b4a517a9109c3cfa5ca89125f1`；基础归档 `0f8644dd85b7c3d21794fb3f718e48773cd1cc60`。变化表、未变化表和卡图哈希见 `data_updates/2026-10-09/manifest.json` |
 | 活动与新卡 | 同一 Master 提交中的活动 #2、成员 #65–#67、留影 #65–#68；成员 #64 仍保留 10 月 3 日已存卡图。活动基础奖励由 Master 分组生成 `event_2.json` |
+| 国际服「Abracadabra」 | [国际服 Master](https://github.com/StarMoe-org/moenotes-masterdata/tree/dfcb4787b7c376a321838336babe59af69b66e39/en) 中的留影 #70 与标题；缩略图取自 `assets.bdon.moe/en/en/SupportCard/70`，哈希见 `data_updates/2026-10-11/snap-70.json`。技能 #71、#73 已存在于日服基准。 |
 | 养成字段参考 | [StarMoe-org/moenotes](https://github.com/StarMoe-org/moenotes)，`bb43324feff14e1295f5e798eb3948e60535aa21` |
 | 综合力、收益、跳过与 AP 计算参考 | [empty-sekai/ournotes-deck](https://github.com/empty-sekai/ournotes-deck)，`dbd9cf01a4854808dceb6aedcd4041af372faeee` |
 | 谱面转换参考 | [MetaSekaiLab/nnnotes](https://github.com/MetaSekaiLab/nnnotes)，`b1e12c4ab31cfed6cd453e562aeeb66c3821af83` |
