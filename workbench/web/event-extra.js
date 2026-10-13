@@ -40,7 +40,7 @@ window.EventPages = (() => {
   const eventTimeLocal = value => dateTimeLocal(String(value).replaceAll('/', '-').replace(' ', 'T') + '+09:00');
   function defaults() {
     return {endAt:eventTimeLocal(catalog.event.end_at), current:'0',
-      target:'675000', currentShop:'0', shopTarget:'', cpStart:'0', dailyLimit:'', normalPt:'', normalCp:'', normalShop:'0',
+      target:'525000', currentShop:'0', shopTarget:'', cpStart:'0', dailyLimit:'', normalPt:'', normalCp:'', normalShop:'0',
       normalBoost:'4', normalMinutes:'3', challengePt:'', challengeCost:'200',
       challengeShop:'0', challengeMinutes:'3'};
   }
@@ -316,6 +316,10 @@ window.EventPages = (() => {
     on('calculatePlan', 'click', calculate);
     on('estimatePlan', 'click', estimateFromTeams);
     on('exportSchedule', 'click', exportCsv);
+    on('planSetSrGoal', 'click', () => {
+      $('planTarget').value = '525000';
+      $('planTarget').dispatchEvent(new Event('change', {bubbles:true}));
+    });
     $('songHistoryRows').addEventListener('click', event => {
       const button = event.target.closest('[data-use-song]');
       if (button) useSimulation(simulations[Number(button.dataset.useSong)]);

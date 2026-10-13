@@ -1,4 +1,4 @@
-# 验证说明 · v0.3.2
+# 验证说明 · v0.3.3
 
 执行 `python -B tools/run_checks.py`。输出在被 Git 忽略的 `work/validation/`，全部输入为合成养成。
 

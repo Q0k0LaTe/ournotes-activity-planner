@@ -53,7 +53,13 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   reports.push('Abracadabra EX Snapshot is searchable, pictured, and can be recorded');
   assert.equal(await page.locator('#simSong,#simDifficulty').count(),2);
   const originalProfile=await page.locator('#profileSelect').inputValue();
-  await page.locator('[data-tab="eventPlan"]').click();await page.locator('#planNormalPt').fill('123');
+  await page.locator('[data-tab="eventPlan"]').click();
+  assert.equal(await page.locator('#planTarget').inputValue(),'525000');
+  assert.match(await page.locator('#eventPlan').textContent(),/75,000 \/ 125,000 \/ 200,000 \/ 300,000 \/ 525,000 PT/);
+  await page.locator('#planTarget').fill('675000');
+  await page.locator('#planSetSrGoal').click();
+  assert.equal(await page.locator('#planTarget').inputValue(),'525000');
+  await page.locator('#planNormalPt').fill('123');
   await page.locator('[data-tab="archive"]').click();await page.locator('#new').click();
   await page.locator('[data-tab="eventPlan"]').click();assert.equal(await page.locator('#planNormalPt').inputValue(),'');
   await page.locator('#profileSelect').selectOption(originalProfile);assert.equal(await page.locator('#planNormalPt').inputValue(),'123');
