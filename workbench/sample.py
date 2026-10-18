@@ -4,7 +4,7 @@ import team_candidates as teams
 
 def sample(data):
     catalog = data.catalog()
-    mids, sids = [59, 11, 55, 26, 3, 65], [33, 37, 52, 61, 3, 1, 2, 5, 6, 7]
+    mids, sids = [59, 11, 55, 26, 3, 68], [33, 37, 52, 61, 3, 1, 2, 5, 6, 71]
     members = {x['id']: x for x in catalog['members']}
     snaps = {x['id']: x for x in catalog['snaps']}
     return {'schema_version': 1, 'name': '合成测试卡库（请勿当作实际养成）', 'is_demo': True,

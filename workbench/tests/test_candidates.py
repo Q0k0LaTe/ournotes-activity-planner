@@ -81,10 +81,11 @@ class CandidateTests(unittest.TestCase):
 
     def test_leader_binding_and_bonus_floor_match_exhaustive_oracle(self):
         request = fixture(self.data, 6)
-        request['candidate_member_ids'].append(65)
+        request['candidate_member_ids'].append(68)
         request['profile']['inventory']['members'].append(
-            {'id': 65, 'level': 20, 'training_count': 0, 'awakening_count': 0,
+            {'id': 68, 'level': 20, 'training_count': 0, 'awakening_count': 0,
              'live_skill_level': 1, 'gekisou_skill_level': 1})
+        request['candidate_snap_ids'][-1] = 71
         request['team_settings'].update(required_leader_id=59,
             required_bindings=[{'member_id': 59, 'snap_id': 33}],
             min_event_bonus_10000=100, min_shop_bonus_10000=100)

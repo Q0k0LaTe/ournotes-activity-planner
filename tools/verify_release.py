@@ -23,6 +23,9 @@ def verify(site):
     card_patch = ROOT / "data_updates/2026-10-11/snap-70.json"
     if info["card_update"]["payload_sha256"] != hashlib.sha256(card_patch.read_bytes()).hexdigest():
         raise ValueError("Abracadabra update differs from source")
+    game_patch = ROOT / "data_updates/2026-10-18/manifest.json"
+    if info["game_update"]["payload_sha256"] != hashlib.sha256(game_patch.read_bytes()).hexdigest():
+        raise ValueError("Current JP game update differs from source")
     files = {p.relative_to(site).as_posix(): p for p in site.rglob("*") if p.is_file()}
     for name, digest in info["static_files"].items():
         if name not in files or hashlib.sha256(files[name].read_bytes()).hexdigest() != digest:

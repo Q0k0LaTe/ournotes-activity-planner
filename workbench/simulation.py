@@ -59,7 +59,8 @@ def simulate(raw, data):
     score = scorer.evaluate(power, slots)
     preview = p.rw.preview_challenge_rewards if challenge else p.rw.preview_normal_rewards
     rewards = preview(data.snapshot, score['rank'], consumed, bonuses['event_pt'],
-                      bonuses['shop_pt'], _context=data.reward_context)['gained']
+                      bonuses['shop_pt'], event_id=data.event_id,
+                      _context=data.reward_context)['gained']
     return {'song_id': song_id, 'song_title': data.text[song['_titleTextID']],
             'difficulty': difficulty, 'mode': mode, 'method': method, 'consumed': consumed,
             'team': {'member_ids': mids, 'snap_ids': sids, 'leader_id': leader},

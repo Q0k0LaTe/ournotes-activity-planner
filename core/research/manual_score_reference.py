@@ -21,7 +21,7 @@ from reward_preview import preview_challenge_rewards
 
 
 MODEL_COMMIT = "dbd9cf01a4854808dceb6aedcd4041af372faeee"
-DATA_COMMIT = "29b2365a5ed294b4a517a9109c3cfa5ca89125f1"
+DATA_COMMIT = "afe0f81f9fde53512febd37c5ec7702c766aee48"
 TABLES = ("MasterLiveMusic", "MasterLiveMusicScore", "MasterLiveScoreRank",
           "MasterChallengeMusic", "MasterLiveSettings", "MasterLiveNoteParameter",
           "MasterLiveJudgementParameter", "MasterLiveComboScoreBonus")

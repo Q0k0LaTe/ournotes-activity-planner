@@ -17,7 +17,7 @@ class PowerModeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data = p.Data()
-        cls.mids, cls.sids = [59, 11, 55, 26, 65], [33, 37, 52, 61, 65]
+        cls.mids, cls.sids = [59, 11, 55, 26, 68], [33, 37, 52, 61, 71]
         catalog = cls.data.catalog()
         cls.profile = {"schema_version": 1, "inventory": {
             "members": [{"id": i, "level": 20, "training_count": 0,
@@ -30,7 +30,7 @@ class PowerModeTests(unittest.TestCase):
     def model(self):
         return p.PowerModel(self.data, self.profile, self.mids, self.sids)
 
-    def fixed_power(self, model, challenge, song=100111, snaps=None, leader=55):
+    def fixed_power(self, model, challenge, song=100114, snaps=None, leader=55):
         model.music(song, challenge)
         rates = p.leader_rates(self.data, model.cards[leader], model.own[leader],
                                [model.cards[m] for m in self.mids],
@@ -76,8 +76,8 @@ class PowerModeTests(unittest.TestCase):
     def test_fast_power_matches_detailed_calculator_in_both_modes(self):
         model = self.model()
         for challenge in (False, True, False):
-            for song in (100076, 100110, 100111):
-                for leader in (55, 59, 65):
+            for song in (100081, 100104, 100114):
+                for leader in (55, 59, 68):
                     for snaps in (self.sids, list(reversed(self.sids))):
                         with self.subTest(challenge=challenge, song=song, leader=leader, snaps=snaps):
                             actual = self.fixed_power(model, challenge, song, snaps, leader)
@@ -91,7 +91,7 @@ class PowerModeTests(unittest.TestCase):
         request = {"profile": deepcopy(self.profile), "candidate_member_ids": self.mids,
                    "candidate_snap_ids": self.sids, "settings": {
                        "boost_budget": 20, "boost_per_live": 4, "starting_cp": 200, "challenge_cp": 200,
-                       **{mode: {"method": "skip", "sheets": [{"song_id": 100111, "difficulty": "expert"}]}
+                       **{mode: {"method": "skip", "sheets": [{"song_id": 100114, "difficulty": "expert"}]}
                           for mode in ("normal", "challenge")}}}
         for solver in (False, True):
             with self.subTest(solver=solver), patch.object(solver_search, "should_use_solver", return_value=solver):

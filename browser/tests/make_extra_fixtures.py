@@ -16,7 +16,7 @@ from benchmark_solver_release import full_request
 data = p.Data()
 multi = expanded_request(data, 10)
 for mode in ("normal", "challenge"):
-    multi["settings"][mode]["sheets"] = [{"song_id": sid, "difficulty": "expert"} for sid in (100076, 100110, 100111)]
+    multi["settings"][mode]["sheets"] = [{"song_id": sid, "difficulty": "expert"} for sid in (100081, 100104, 100114)]
 for name, request in (("solver-top3-resume", multi), ("full-catalog-skip", full_request(data))):
     begin = time.monotonic()
     result = p.optimize(request, data=data)

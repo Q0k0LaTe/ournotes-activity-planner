@@ -12,9 +12,9 @@ def _json_bytes(value):
     return (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
 
 
-def apply_snap_update(overrides, manifest, entries):
+def apply_snap_update(overrides, manifest, entries, *, expected_jp_commit=None):
     patch = json.loads(UPDATE.read_text(encoding="utf-8"))
-    if manifest["data_commit"] != patch["base_data_commit"]:
+    if manifest["data_commit"] != (expected_jp_commit or patch["base_data_commit"]):
         raise ValueError("Snap update does not match the pinned JP snapshot")
     if patch["snap_ids"] != [70] or set(patch["tables"]) != {"MasterSupportCard", "MasterText"}:
         raise ValueError("Unexpected Abracadabra update contents")
@@ -40,7 +40,7 @@ def apply_snap_update(overrides, manifest, entries):
                       "commit": patch["source_commit"], "path": path, "source_url": None,
                       "git_blob_sha": hashlib.sha1(blob).hexdigest(),
                       "derived_from": [{"repository": manifest["data_repository"],
-                                        "commit": patch["base_data_commit"]},
+                                        "commit": manifest["data_commit"]},
                                        {"repository": patch["source_repository"],
                                         "commit": patch["source_commit"],
                                         "path": f"{patch['source_path']}/{name}.json",

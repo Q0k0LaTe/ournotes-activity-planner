@@ -239,23 +239,25 @@ def workbench_catalog(data):
             if kind == 'members':
                 live = data.index['MasterLiveSkill'][raw['_liveSkillID']]
                 card['live_skill_name'] = data.text[live['_nameTextID']]
-    catalog['event'] = {'id': data.event_id, 'name': '拜托了，倾心一掷',
+    catalog['event'] = {'id': data.event_id, 'name': 'Shake Your 魂, Baby!!',
                         'original_name': data.text[event['_nameTextId']],
                         'start_at': event['_startAt'], 'end_at': event['_endAt'],
-                        'snapshot': '2026-10-09', 'rules': list(rules.values()),
+                        'snapshot': '2026-10-18', 'rules': list(rules.values()),
                         'parameter_bonus_applies_to': 'challenge_only'}
-    prior = data.index['MasterEvent'][1]
-    prior_rewards = p.read_json(data.snapshot / 'normalized/event_1.json')
-    catalog['event_archive'] = [{'id': 1, 'name': '爱的奔流 AtoZ',
-                                  'original_name': data.text[prior['_nameTextId']],
-                                  'start_at': prior['_startAt'], 'end_at': prior['_endAt'],
-                                  'snapshot': '2026-10-01',
-                                  'currency_item_id': prior_rewards['shop_currency_item_id'],
-                                  'normal_rewards': [{k: row[k] for k in ('rank', 'event_pt_base', 'shop_pt_base_guaranteed')}
-                                                     for row in prior_rewards['ordinary_base_rewards']],
-                                  'challenge_rewards': [{k: row[k] for k in ('rank', 'event_pt_base', 'shop_pt_base_guaranteed')}
-                                                        for row in prior_rewards['challenge_base_rewards']],
-                                  'url': 'https://haneoka.org/intl/zh-CN/events/1/'}]
+    catalog['event_archive'] = []
+    for old_id, old_name, snapshot in ((1, '爱的奔流 AtoZ', '2026-10-01'),
+                                       (2, '拜托了，倾心一掷', '2026-10-09')):
+        prior = data.index['MasterEvent'][old_id]
+        rewards = p.read_json(data.snapshot / f'normalized/event_{old_id}.json')
+        catalog['event_archive'].append({
+            'id': old_id, 'name': old_name, 'original_name': data.text[prior['_nameTextId']],
+            'start_at': prior['_startAt'], 'end_at': prior['_endAt'], 'snapshot': snapshot,
+            'currency_item_id': rewards['shop_currency_item_id'],
+            'normal_rewards': [{k: row[k] for k in ('rank', 'event_pt_base', 'shop_pt_base_guaranteed')}
+                               for row in rewards['ordinary_base_rewards']],
+            'challenge_rewards': [{k: row[k] for k in ('rank', 'event_pt_base', 'shop_pt_base_guaranteed')}
+                                  for row in rewards['challenge_base_rewards']],
+            'url': f'https://haneoka.org/jp/ja/events/{old_id}/'})
     return catalog
 
 

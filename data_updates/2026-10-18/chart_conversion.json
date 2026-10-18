@@ -1,0 +1,109 @@
+{
+  "converter_commit": "b1e12c4ab31cfed6cd453e562aeeb66c3821af83",
+  "charts": [
+    {
+      "score_id": 10011300,
+      "music_id": 100113,
+      "difficulty": "easy",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0113/0113_00.bytes",
+      "source_sha256": "9e6fe216fa96275719895ca08c2204181340bbcdfdd2abd1f8dbcf8b137c8165",
+      "saved_path": "normalized/converted_charts/100113/easy.json",
+      "converted_record_sha256": "811e4dcbe104954a33700825dcb3ff6d91a0f96b2617e108aa410b1d8688909e",
+      "judgement_count": 336,
+      "score_denominator": 125,
+      "score_percent_sum_i32": 12450,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011301,
+      "music_id": 100113,
+      "difficulty": "normal",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0113/0113_01.bytes",
+      "source_sha256": "f7d2470e922428f84e9e0c9bad25bc0ef1a351fcd87cb2c3fad2341dc1b261a8",
+      "saved_path": "normalized/converted_charts/100113/normal.json",
+      "converted_record_sha256": "add554db09915b550343498778c42217618b8a221d28bd817f382e67eec0634f",
+      "judgement_count": 449,
+      "score_denominator": 210,
+      "score_percent_sum_i32": 20960,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011302,
+      "music_id": 100113,
+      "difficulty": "hard",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0113/0113_02.bytes",
+      "source_sha256": "f93fe53d2108281a833075de750e6b348c9dbc092f4e30ae0b0a6e3c87288b6a",
+      "saved_path": "normalized/converted_charts/100113/hard.json",
+      "converted_record_sha256": "f678cf7e32a9a0196612b6bb60930dc13e4d7a7cc7f6bb7e1e829e36431e7ca7",
+      "judgement_count": 651,
+      "score_denominator": 402,
+      "score_percent_sum_i32": 40170,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011303,
+      "music_id": 100113,
+      "difficulty": "expert",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0113/0113_03.bytes",
+      "source_sha256": "f767da6c5b76535ce3355ade0753af0bcfcb0af609352ca2aef5e18c86433d07",
+      "saved_path": "normalized/converted_charts/100113/expert.json",
+      "converted_record_sha256": "de2eb2a57f4a71c937c2a4c53aa1e7f22dc2ecde4bba29bf034eea99107bd3d6",
+      "judgement_count": 846,
+      "score_denominator": 617,
+      "score_percent_sum_i32": 61650,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011400,
+      "music_id": 100114,
+      "difficulty": "easy",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0114/0114_00.bytes",
+      "source_sha256": "6beb06c1bb1ff8299a2d3f6d381ae7f1c2ee101466a2f2f1f7caf8edd6df0ff3",
+      "saved_path": "normalized/converted_charts/100114/easy.json",
+      "converted_record_sha256": "ae4a5f3b623aeaec4f649aee3bbcb3029e7ed429689e0556606588c12e1b118f",
+      "judgement_count": 189,
+      "score_denominator": 104,
+      "score_percent_sum_i32": 10350,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011401,
+      "music_id": 100114,
+      "difficulty": "normal",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0114/0114_01.bytes",
+      "source_sha256": "1fd5bdb6fc47bd38ddd6171b1696d62952a15a92cf357cb2ba45c038c9961676",
+      "saved_path": "normalized/converted_charts/100114/normal.json",
+      "converted_record_sha256": "3bde25796c4ff39ee3c9784482e12807e05b732625d078571bcf82593e80f71d",
+      "judgement_count": 285,
+      "score_denominator": 224,
+      "score_percent_sum_i32": 22380,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011402,
+      "music_id": 100114,
+      "difficulty": "hard",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0114/0114_02.bytes",
+      "source_sha256": "108e2d77c56c5f15424b422914570e39f0bfda29c0085d25a8d7656098435668",
+      "saved_path": "normalized/converted_charts/100114/hard.json",
+      "converted_record_sha256": "a11781068d3368c0305956b707c05bf3ddb6e80131dbcbc1b3d8a9aecc4a8059",
+      "judgement_count": 464,
+      "score_denominator": 392,
+      "score_percent_sum_i32": 39110,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    },
+    {
+      "score_id": 10011403,
+      "music_id": 100114,
+      "difficulty": "expert",
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/Live/MusicScore/0114/0114_03.bytes",
+      "source_sha256": "97a79e24f0e8e903e1657685040425516e68ac0daf65e0ff29ccc27c1320c5dc",
+      "saved_path": "normalized/converted_charts/100114/expert.json",
+      "converted_record_sha256": "48346aed7e7a6b909ffe833a5e225573c2a5bb0d99f31e4934c482ca3720a882",
+      "judgement_count": 589,
+      "score_denominator": 519,
+      "score_percent_sum_i32": 51880,
+      "calculation_basis": "Pinned nnnotes deckdata.chart_record and bdon-linked skip.rs divisor."
+    }
+  ]
+}

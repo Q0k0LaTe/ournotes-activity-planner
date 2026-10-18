@@ -17,13 +17,13 @@ class CardUpdateTests(unittest.TestCase):
 
     def test_birthday_member_is_in_catalog_and_usable_as_leader(self):
         catalog = teams.workbench_catalog(self.data)
-        self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (67, 69))
-        for kind, last in (('members', 67), ('snaps', 68)):
+        self.assertEqual((len(catalog['members']), len(catalog['snaps'])), (70, 73))
+        for kind, last in (('members', 70), ('snaps', 73)):
             cards = catalog[kind]
-            expected = set(range(1, last + 1)) | ({70} if kind == 'snaps' else set())
+            expected = set(range(1, last + 1))
             self.assertEqual({c['id'] for c in cards}, expected)
             self.assertEqual(sum(c['rarity'] == 2 for c in cards), 25)
-            self.assertEqual(sum(c['rarity'] == 3 for c in cards), 27)
+            self.assertEqual(sum(c['rarity'] == 3 for c in cards), 28)
         self.assertEqual([c['title'] for c in catalog['members'] if c['id'] in (65, 66, 67)],
                          ['薄明を裂いて', '光芒に立つ', '笑み、暗がりにて'])
         self.assertEqual([c['title'] for c in catalog['snaps'] if c['id'] in (65, 66, 67, 68)],

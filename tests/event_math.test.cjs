@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {plan, reward} = require('../workbench/web/event-math.js');
-const event = {id:2};
+const event = {id:3};
 
 const base = {
   now:'2026-10-05T12:00:00', endAt:'2026-10-07T23:59:00', current:0,
@@ -34,7 +34,7 @@ test('reports a daily capacity shortfall and rejects unreachable goals', () => {
   assert.throws(() => plan({...base, normalPt:0, normalCp:0, challengePt:0}), /无法达到目标/);
 });
 
-test('rejects costs that cannot occur in event 2', () => {
+test('rejects costs that cannot occur in event 3', () => {
   assert.throws(() => plan({...base, normalBoost: 1.5}), /普通每局 Boost/);
   assert.throws(() => plan({...base, normalBoost: 11}), /普通每局 Boost/);
   assert.throws(() => plan({...base, challengeCost: 600}), /挑战每局 CP/);

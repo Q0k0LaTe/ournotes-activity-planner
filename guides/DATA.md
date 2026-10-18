@@ -5,33 +5,27 @@
 ```text
 OurNotes-配队程序-v0.2.5.zip
 SHA-256: 396a5b670f8e15f7ce3e5582ca9ed114658d40de801f9d7233351027888ca914
-基础归档: 2026-10-01，活动 #1；当前 Master 增量: 2026-10-09
-当前活动 ID: 2；活动 #1 基础奖励保留为历史记录
-成员卡: 67；Snap: 69（含国际服 #70）
-歌曲: 87（转换谱面 348）；活动配队不指定歌曲，歌曲模拟使用这些谱面
+基础归档: 2026-10-01，活动 #1；Master 增量: 2026-10-09、2026-10-18
+当前活动 ID: 3；活动 #1、#2 基础奖励保留为历史记录
+成员卡: 70；Snap: 73（含国际服 #70）
+歌曲: 89（转换谱面 356）
 ```
 
-基础 ZIP 位于 `browser/upstream/`，不改动其原始字节。构建先验证基础 SHA-256，再叠加 `data_updates/2026-10-09/` 中固定哈希的日服 Master 表、卡图与谱面，然后从 `data_updates/2026-10-11/` 补入国际服留影 #70 的卡片行、标题与缩略图。其余运行 Master 表逐字节对应 10 月 9 日固定来源提交；旧活动的 `normalized/event_1.json` 仍保留。优化层的八个源码文件及其 SHA-256 另记录在 `build-info.json` 的 `core_overrides` 中；运行包必须逐字节匹配这些文件。公开包不含原玩家卡库、私人养成观察、截图结算或 SQLite；初始化时使用空白个人卡库。测试生成器只使用合成养成。
+基础 ZIP 位于 `browser/upstream/`，不改动其原始字节。构建先验证基础 SHA-256，再叠加 `data_updates/2026-10-09/` 和 `data_updates/2026-10-18/` 的固定哈希日服 Master 表、卡图与谱面，最后补入 `data_updates/2026-10-11/` 的国际服留影 #70。活动 #1、#2 的规范化奖励表保留，当前计算使用活动 #3。固定模型的源码覆盖哈希仍记录在 `build-info.json` 的 `core_overrides` 中。公开包不含原玩家卡库、私人养成观察、截图结算或 SQLite；初始化时使用空白个人卡库。测试生成器只使用合成养成。
 
 ## 来源
 
 | 内容 | 公开来源与固定版本 |
 | --- | --- |
-| Master 数据 | [StarMoe-org/moenotes-masterdata](https://github.com/StarMoe-org/moenotes-masterdata)，当前 `29b2365a5ed294b4a517a9109c3cfa5ca89125f1`；基础归档 `0f8644dd85b7c3d21794fb3f718e48773cd1cc60`。变化表、未变化表和卡图哈希见 `data_updates/2026-10-09/manifest.json` |
-| 活动与新卡 | 同一 Master 提交中的活动 #2、成员 #65–#67、留影 #65–#68；成员 #64 仍保留 10 月 3 日已存卡图。活动基础奖励由 Master 分组生成 `event_2.json` |
-| 国际服「Abracadabra」 | [国际服 Master](https://github.com/StarMoe-org/moenotes-masterdata/tree/dfcb4787b7c376a321838336babe59af69b66e39/en) 中的留影 #70 与标题；缩略图取自 `assets.bdon.moe/en/en/SupportCard/70`，哈希见 `data_updates/2026-10-11/snap-70.json`。技能 #71、#73 已存在于日服基准。 |
+| Master 数据 | [StarMoe-org/moenotes-masterdata](https://github.com/StarMoe-org/moenotes-masterdata/commit/afe0f81f9fde53512febd37c5ec7702c766aee48) 日服提交 `afe0f81f9fde53512febd37c5ec7702c766aee48`。网站使用的 71 张表中 25 张变化、46 张未变，字节与 Git blob 哈希见 `data_updates/2026-10-18/manifest.json`。基础归档提交为 `0f8644dd85b7c3d21794fb3f718e48773cd1cc60`。 |
+| 活动与新卡 | 同一 Master 提交中的活动 #3、成员 #68–#70、留影 #69/#71–#73；活动基础奖励由原始表分组生成 `event_3.json`。国际服 #70 仍按固定 [国际服提交](https://github.com/StarMoe-org/moenotes-masterdata/tree/dfcb4787b7c376a321838336babe59af69b66e39/en) 的行与图覆盖。 |
+| 卡图与谱面 | 新增缩略图及两首歌的 8 张原始谱面取自 [haneoka 日服静态素材](https://haneoka.org/jp/ja/)，下载地址、原图和转换结果哈希见本次清单。PNG 缩略图用 `cwebp -q 90 -m 6` 生成站点 WebP；转换谱面使用固定 [nnnotes](https://github.com/MetaSekaiLab/nnnotes/tree/b1e12c4ab31cfed6cd453e562aeeb66c3821af83) 的 `deckdata.chart_record`。 |
 | 养成字段参考 | [StarMoe-org/moenotes](https://github.com/StarMoe-org/moenotes)，`bb43324feff14e1295f5e798eb3948e60535aa21` |
 | 综合力、收益、跳过与 AP 计算参考 | [empty-sekai/ournotes-deck](https://github.com/empty-sekai/ournotes-deck)，`dbd9cf01a4854808dceb6aedcd4041af372faeee` |
-| 谱面转换参考 | [MetaSekaiLab/nnnotes](https://github.com/MetaSekaiLab/nnnotes)，`b1e12c4ab31cfed6cd453e562aeeb66c3821af83` |
-| 谱面与卡图公共地址 | [bdon / Moenotes](https://bdon.moe/)，实际字节哈希保留在公开源清单 |
 
-综合力、活动加成、技能、歌曲得分与结算估算沿用固定模型。默认无歌曲活动配队先按活动 PT 加成排序；单曲搜索可按理论 AP 的保守评级比较每局活动 PT、徽章或最低分。普通跳过固定按 C 评级奖励结算，跳过参考分数不参与奖励或最高分；挑战演出不能跳过。活动拉表用每局模型值或玩家实测值计算。新活动 #2 的基础奖励、加成与谱面均已接入；尚无本轮实机结算，收益仅为客户端参考模型估算。旧活动 #1 的实机截图验证不自动适用于活动 #2。公式、旧实验与不确定范围见 [活动计算验证](EVENT-VALIDATION.md)。来源清单位于基础归档 `research/2026-10-01/`、本次增量和 `licenses/source_manifest.json`。静态网站的 `build-info.json` 记录模型、浏览器版本和运行数据哈希。
+综合力、活动加成、技能、歌曲得分与结算估算沿用固定模型。默认无歌曲活动配队先按活动 PT 加成排序；单曲搜索可按理论 AP 的保守评级比较每局活动 PT、徽章或最低分。普通跳过固定按 C 评级奖励结算，跳过参考分数不参与奖励或最高分；挑战演出不能跳过。活动拉表用每局模型值或玩家实测值计算。活动 #3 的五张 SR 奖励门槛为 75,000／125,000／200,000／300,000／525,000 PT；挑战 200 CP 的 B／A／S／SS 活动 PT 基础值为 2,750／3,500／4,500／5,500。旧活动的实机截图验证不自动适用于活动 #3，收益仍是客户端参考模型估算。公式、旧实验与不确定范围见 [活动计算验证](EVENT-VALIDATION.md)。静态网站的 `build-info.json` 记录模型、浏览器版本和运行数据哈希。
 
-2026-10-13 用户提供的活动平衡调整公告截图与固定活动 #2 Master 表一致：挑战 200 CP 的 B／A／S／SS 活动 PT 基础值为 2,750／3,500／4,500／5,500，D／A／S／SS 徽章基础值为 2,150／4,150／4,900／5,650。`MasterEventAchievementReward` 中活动 #2 的五张 SR 奖励门槛为 75,000／125,000／200,000／300,000／525,000 PT。网页拉表默认目标同步为 525,000 PT；已有浏览器草稿的目标值保留，需按需要点按钮更新。截图未列出活动开始赠送的挑战 PT 数量，因此当前 CP 仍由玩家填写。
-
-v0.2.5 按游戏帮助修正本项目调用上下文：普通演出关闭成员与 Snap 的活动参数加成，挑战开启；PT 加成保持独立。详见 [模式修复说明](POWER-MODES.md) 与 [基准差异](../model-fixes/0.2.5-power-modes.patch)。计算参考源码未更换，Master 原始表按本次固定提交更新。
-
-当前覆盖活动 #2、普通／挑战单人、撃奏关闭。无歌曲潜力指标假设 AP/PERFECT、正生命值、每名成员发动一次且均匀覆盖，不包含顺序与截断；具体歌曲评分按已转换谱面与 120 种技能顺序估算。新谱面 #100111 与 #100112 的 8 个难度由固定 `nnnotes` 转换器生成，并以原始资产及转换结果哈希核验。历史截图校准不能代替新版游戏实测。数据不会自动更新。活动规则可对照 [haneoka 活动 #2 页面](https://haneoka.org/intl/zh-CN/events/2/)。
+当前覆盖活动 #3、普通／挑战单人、撃奏关闭。无歌曲潜力指标假设 AP/PERFECT、正生命值、每名成员发动一次且均匀覆盖，不包含顺序与截断；具体歌曲评分按已转换谱面与 120 种技能顺序估算。数据不会自动更新。
 
 ## 更新固定基准
 

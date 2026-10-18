@@ -33,7 +33,7 @@ import score_intervals
 from performance_trace import Trace
 
 VERSION = "0.2.5"
-ACTIVE_EVENT_ID = 2
+ACTIVE_EVENT_ID = 3
 ORDERS = tuple(itertools.permutations(range(5)))
 RANKS = ("D", "C", "B", "A", "S", "SS")
 # Memory budget for matching states, never a limit on the candidate pool.
@@ -71,10 +71,10 @@ def demo_profile():
             "candidate_snap_ids": [33, 37, 52, 61, 3] if has_sample else [],
             "settings": {"boost_budget": 20, "boost_per_live": 4, "starting_cp": 0,
                          "challenge_cp": 200,
-                         "normal": {"song_id": 100111, "difficulty": "expert", "method": "ap",
-                                    "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100076, 100110, 100111)]},
-                         "challenge": {"song_id": 100111, "difficulty": "expert", "method": "ap",
-                                       "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100076, 100110, 100111)]}},
+                         "normal": {"song_id": 100114, "difficulty": "expert", "method": "ap",
+                                    "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100081, 100104, 100114)]},
+                         "challenge": {"song_id": 100114, "difficulty": "expert", "method": "ap",
+                                       "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100081, 100104, 100114)]}},
             "schema_version": 1, "is_demo": has_sample}
 
 
@@ -83,7 +83,7 @@ class Data:
     def __init__(self, snapshot=SNAPSHOT):
         self.snapshot = Path(snapshot)
         self.manifest, self.tables = dp._snapshot(self.snapshot)
-        self.snapshot_label = "2026-10-09 · 活动 #2"
+        self.snapshot_label = "2026-10-18 · 活动 #3"
         self.event_id = ACTIVE_EVENT_ID
         self.skill_inputs = sk._load(self.snapshot.resolve())
         # The skill loader verifies formation groups. Additional cumulative and
@@ -889,6 +889,7 @@ def _reward_rows(data, rows, mode, consumed):
     for raw in rows:
         row = {**raw, "per_live": preview(data.snapshot, raw["score"]["rank"], consumed,
                                           raw["bonuses_10000"]["event_pt"], raw["bonuses_10000"]["shop_pt"],
+                                          event_id=data.event_id,
                                           _context=data.reward_context)["gained"]}
         gains = row["per_live"]
         key = (gains["cp"], gains["event_pt"], gains["shop_pt"])
@@ -1289,7 +1290,7 @@ def calibration(data=None):
                                        "challenge_rank": "B", "challenge_event_pt": 5304, "challenge_shop_pt": 8160,
                                        "challenge_cp_gained": 0, "normal_event_pt": 1442, "normal_shop_pt": 2100,
                                        "normal_cp": 100},
-            "notes": ["历史活动 #1 的综合力与挑战收益匹配已核对的截图；活动 #2 尚无实机结算校准。",
+            "notes": ["历史活动 #1 的综合力与挑战收益匹配已核对的截图；活动 #3 尚无实机结算校准。",
                       "200 CP 是与 1 倍收益相符的模型输入，实际扣费未由结算截图直接显示。",
                       "普通演出截图为另一组未知队伍；只用于核对收益，不能当作当前队伍的普通演出实测。",
                       "后续搜索结果均为模型估算；截图示例不等于你的完整卡库。"]}

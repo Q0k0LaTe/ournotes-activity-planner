@@ -1,4 +1,4 @@
-"""Cross-check event #2 rewards against pinned raw Master rows."""
+"""Cross-check event #3 rewards against pinned raw Master rows."""
 import unittest
 
 import planner_core as p
@@ -53,10 +53,10 @@ class EventRewardTests(unittest.TestCase):
         self.assertEqual(second['event_pt'], first['event_pt'])
         self.assertEqual(second['shop_pt'], 600)
 
-    def test_event_2_sr_milestones_match_pinned_master(self):
+    def test_event_3_sr_milestones_match_pinned_master(self):
         rows = p.read_json(self.data.snapshot / 'raw/MasterEventAchievementReward.json')['_allData']
         milestones = [row['_eventPoint'] for row in rows
-                      if row['_eventId'] == 2 and row['_rewardIds'] == [185]]
+                      if row['_eventId'] == 3 and row['_rewardIds'] == [252]]
         self.assertEqual(milestones, [75000, 125000, 200000, 300000, 525000])
 
 

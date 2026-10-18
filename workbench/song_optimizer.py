@@ -156,6 +156,7 @@ def optimize(raw, data, progress=lambda **kw: None, cancelled=lambda: False):
             evaluated += 1
             rewards = preview(data.snapshot, score['rank'], consumed,
                               bonuses['event_pt'], bonuses['shop_pt'],
+                              event_id=data.event_id,
                               _context=data.reward_context)['gained']
             if objective == 'event_pt':
                 key = (rewards['event_pt'], rewards['shop_pt'], score['minimum_score'], power)
