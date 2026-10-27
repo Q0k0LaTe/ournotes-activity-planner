@@ -1,0 +1,40 @@
+{
+  "_allData": [
+    {
+      "_id": 1,
+      "_eventId": 1,
+      "_loopStartEventPoint": 3000000,
+      "_loopEventPoint": 1000000,
+      "_rewardIds": [
+        121
+      ]
+    },
+    {
+      "_id": 2,
+      "_eventId": 2,
+      "_loopStartEventPoint": 2000000,
+      "_loopEventPoint": 1000000,
+      "_rewardIds": [
+        120
+      ]
+    },
+    {
+      "_id": 3,
+      "_eventId": 3,
+      "_loopStartEventPoint": 2000000,
+      "_loopEventPoint": 1000000,
+      "_rewardIds": [
+        123
+      ]
+    },
+    {
+      "_id": 4,
+      "_eventId": 4,
+      "_loopStartEventPoint": 2000000,
+      "_loopEventPoint": 1000000,
+      "_rewardIds": [
+        286
+      ]
+    }
+  ]
+}

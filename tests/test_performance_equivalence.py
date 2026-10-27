@@ -109,17 +109,17 @@ class PreparationTests(unittest.TestCase):
         data = p.Data()
         with patch.object(p.ms, "_checked_inputs", wraps=p.ms._checked_inputs) as check:
             for mode in [False, True]:
-                p.Scores(data, {"song_id": 100114, "difficulty": "expert", "method": "ap"}, mode)
+                p.Scores(data, {"song_id": 100115, "difficulty": "expert", "method": "ap"}, mode)
             self.assertEqual(check.call_count, 1)
         with self.assertRaises(TypeError):
             data.score_inputs.values[1]["MasterLiveSettings"][0]["_value"] = "0"
         report = copy.deepcopy(data.conversion_report)
         report["errors"] = ["synthetic corruption"]
         with self.assertRaises(ValueError):
-            p.ms.prepare_ap_chart(data.snapshot, 100114, "expert", 1, ordinary=True,
+            p.ms.prepare_ap_chart(data.snapshot, 100115, "expert", 1, ordinary=True,
                                   _conversion_report=report, _verified_inputs=data.score_inputs)
         with self.assertRaises(ValueError):
-            p.ms.prepare_ap_chart(data.snapshot, 100114, "expert", 1, ordinary=True, _verified_inputs={"verified": True})
+            p.ms.prepare_ap_chart(data.snapshot, 100115, "expert", 1, ordinary=True, _verified_inputs={"verified": True})
 
     def test_threshold_probes_reused_and_unreachable_domain_preserved(self):
         chart = {"rank_thresholds": [{"_liveScoreRank": r, "_requiredScore": r * 11} for r in p.ms.RANKS]}
@@ -140,7 +140,7 @@ class PreparationTests(unittest.TestCase):
         from performance_trace import SignatureCache
         trace = p.Trace()
         trace.signatures = SignatureCache(1)
-        scorer = p.Scores(self.data, {"song_id": 100114, "difficulty": "expert", "method": "ap"}, True, trace)
+        scorer = p.Scores(self.data, {"song_id": 100115, "difficulty": "expert", "method": "ap"}, True, trace)
         request = p.demo_profile()
         slots = p.sk.derive_ap_skill_contract(self.data.snapshot, request["profile"], request["candidate_member_ids"],
                     request["candidate_snap_ids"], _verified_inputs=self.data.skill_inputs)["slots"]
@@ -173,6 +173,15 @@ class PreparationTests(unittest.TestCase):
         import time
         from benchmark_solver_release import full_request
         request = full_request(self.data)
+        # This test directly constructs the linear CP-SAT engine. Conditional
+        # leaders use the exact fallback, covered by the full-pool tests.
+        conditional = {row['_leaderSkillID'] for row in self.data.tables['MasterLeaderSkillEffect']
+                       if row['_skillEffectType'] != 0 and (
+                           row['_skillEffectType'] not in (1000, 1001, 1002, 1003)
+                           or row['_skillConditionGroup'] or row['_skillCumulativeConditionID']
+                           or row['_effectExecuteLimitCount'] or row['_effectExecuteLimitResetConditionGroup'])}
+        request['candidate_member_ids'] = [mid for mid in request['candidate_member_ids']
+            if self.data.index['MasterMemberCard'][mid]['_leaderSkillID'] not in conditional]
         model = p.PowerModel(self.data, request["profile"], request["candidate_member_ids"], request["candidate_snap_ids"])
         specs = {mode: p._song_specs(request["settings"], mode, self.data) for mode in ss.MODES}
         search = ss.Search(request, self.data, model, specs, 1, lambda **kw: None, lambda: False,

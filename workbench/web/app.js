@@ -354,7 +354,11 @@ async function checkGrowth(){
   }catch(e){notice(e.message,true);return null;}
 }
 function gotoIssue(index){const issue=issues[index];if(issue.target==='card'){openEditor(issue.kind,issue.id);return;}growthBand=0;tab('growth');renderGrowth();const id=issue.target==='global'?(issue.field==='character_total_rank'?'totalRank':'tgwRank'):null;const el=id?$(id):$('growthFields').querySelector(`[data-${issue.target==='rank'?'rank':'facility'}="${issue.id}"]`);el?.scrollIntoView({behavior:'smooth',block:'center'});el?.focus();}
-function skillText(slot){return slot.live_effects.map(e=>`${e.effect_value/100}% × ${e.effective_activation_ms/1000} 秒${e.skill_effect_type===2004?'（PERFECT 目标 '+e.judgement_targets.filter(t=>t===5).length+' 项）':''}`).join('；');}
+function skillText(slot){
+  const live=slot.live_effects.map(e=>`${e.effect_value/100}% × ${e.effective_activation_ms/1000} 秒${e.skill_effect_type===2004?'（PERFECT 目标 '+e.judgement_targets.filter(t=>t===5).length+' 项）':''}`);
+  for(const e of slot.active_support_effects||[])live.push(`Snap 累计加分：每 ${e.notes_per_step} 次 PERFECT +${e.effect_value/100}%，上限 ${Math.min(e.effect_value*e.max_count,e.max_effect_value)/100}%，持续 ${e.activation_ms/1000} 秒`);
+  return live.join('；');
+}
 function teamText(team,index){
   const settings=result.settings,lines=[`Our Notes 配队 ${index+1} · ${team.reason}`,`档案：${resultInput.name}${resultInput.profile_kind==='plan'?'（升级规划）':resultInput.is_demo?'（合成示例）':''}`,`模式：${settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`}`,`综合力场景：${settings.music_attribute?types[settings.music_attribute]+'属性匹配，不含标签':'基础综合力，不含乐曲属性/标签'}`,`综合力：${team.power}`,`活动 PT 加成：${team.bonuses_10000.event_pt/100}%；活动徽章加成：${team.bonuses_10000.shop_pt/100}%`, ''];
   team.slots.forEach((slot,i)=>{const m=card('members',slot.member_id),s=card('snaps',slot.snap_id),mr=resultInput.profile.inventory.members.find(r=>r.id===m.id),sr=resultInput.profile.inventory.snaps.find(r=>r.id===s.id);lines.push(`${i+1}. 成员 #${m.id} ${m.title} / ${m.name}${m.id===team.leader_id?' [队长]':''}`,`   Lv.${mr.level}；特训 ${mr.training_count+1} 阶；觉醒 ${mr.awakening_count}；Live Lv.${slot.live_skill_level}：${skillText(slot)}`,`   Snap #${s.id} ${s.title} / ${s.name}；Lv.${sr.level}；突破 ${sr.limit_break_count}；延长 ${slot.extension_ms/1000} 秒`);});

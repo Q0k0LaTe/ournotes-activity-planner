@@ -1,0 +1,429 @@
+{
+  "schema_version": 1,
+  "source_repository": "StarMoe-org/moenotes-masterdata",
+  "source_path": "jp",
+  "update_id": "jp-2026-10-27-event-4",
+  "base_data_commit": "afe0f81f9fde53512febd37c5ec7702c766aee48",
+  "source_commit": "e262c0db822728edb0b2fb89c5f134237740b1e7",
+  "active_event_id": 4,
+  "collected_at_utc": "2026-10-27T20:25:37.052766+00:00",
+  "tables": {
+    "MasterChallengeLiveEventReward.json": {
+      "sha256": "fad54b117a201f0d33e4cd684f614327a23abac346a3d4aa3a4a48bbabf66961",
+      "git_blob_sha": "215843da77398426c94b1729b8e45f5b61d89ad7",
+      "row_count": 24
+    },
+    "MasterChallengeMusic.json": {
+      "sha256": "43cc29bbfe1b34828dc626f688fe20e6ebc74e1297ff89c9d0293e8f517268f1",
+      "git_blob_sha": "5ae58155cf5adaaffba3616375850de8180ada0b",
+      "row_count": 13
+    },
+    "MasterChallengeMusicRankingReward.json": {
+      "sha256": "2b262b9f9bf7114d8647927194652c0a56430ce4b833f4a3d0d9061b69ed1680",
+      "git_blob_sha": "76e312ddb30721353bc45fb2c819d76cebc33b75",
+      "row_count": 156
+    },
+    "MasterEvent.json": {
+      "sha256": "716de055cfbbd89bdb4914f52e63189a6680821cb76f4413ec31a0616f21e0fa",
+      "git_blob_sha": "eda752c78c07c756fdc8107ea45284ac78ce691b",
+      "row_count": 4
+    },
+    "MasterEventAchievementLoopReward.json": {
+      "sha256": "41a0e3fafb17ee8a61f3f631806e4296e1329f27110397e952e82deb58548a51",
+      "git_blob_sha": "5dd1ad2bbe02cf9b061ab0457866d4debf836e02",
+      "row_count": 4
+    },
+    "MasterEventAchievementReward.json": {
+      "sha256": "a68c2851d59437738471df984ecdbaab788ee83b60e8888cedeb3e01ed39943d",
+      "git_blob_sha": "a4c2d923921fbf3058b1c4225154cb6bd05e4e93",
+      "row_count": 303
+    },
+    "MasterEventEffect.json": {
+      "sha256": "3be74d8ebed118419aba3d40d83854d89295ce1156228c1ffa26f3b4edac394f",
+      "git_blob_sha": "be9ee10de3553bfce5ce111ea5b4b0f4cadc6fe3",
+      "row_count": 92
+    },
+    "MasterEventPickUpCard.json": {
+      "sha256": "b5ad89c88f374920fadd18ef5b86eb145cb10485f5b9f2da880288b39ffdbd4e",
+      "git_blob_sha": "cc2a89a3031d13bb544771e64d8569fb57abb241",
+      "row_count": 8
+    },
+    "MasterGekisouSkillEffect.json": {
+      "sha256": "1b8111ec63978c5f5bae4ce55cbe5dc0287dfabb0fa2a9ba8cf9dc365756c82a",
+      "git_blob_sha": "7d0f370f21bedd2edda5fefbe3c85c0bad22f571",
+      "row_count": 155
+    },
+    "MasterItem.json": {
+      "sha256": "f45fbeab57f49c5dfcbaae3df0e2c47dc47b2e66d6b507d9b7d4e443d61b1dcf",
+      "git_blob_sha": "52b657911c1add5302221b8f5fba2441f4142ab3",
+      "row_count": 168
+    },
+    "MasterLeaderSkill.json": {
+      "sha256": "2a4aad00c0610cd82315764ed4887b0610899ad522e1ba5a2d3de22187010beb",
+      "git_blob_sha": "c3542703b6f49006e335dd429b1ad1863bd5c21a",
+      "row_count": 224
+    },
+    "MasterLeaderSkillEffect.json": {
+      "sha256": "6da43cb95d232c8432af89fef61989f50acbad2343b7e36e8111c35b262f966a",
+      "git_blob_sha": "08c2b0c6ea16d7eb3dd7703b3349a1f37da8b2bf",
+      "row_count": 1185
+    },
+    "MasterLiveEventReward.json": {
+      "sha256": "92ac3ab00d456de244d3fcedc83353049f612ae453c5416890ee11ad4cb719ef",
+      "git_blob_sha": "8ad80a85ccbc6f337bd977f688b7ff51b11da7db",
+      "row_count": 24
+    },
+    "MasterLiveMusic.json": {
+      "sha256": "603355c5a2de828f5939fc26b7d1aa96bdcb93d88c2ae50722714860df1541bd",
+      "git_blob_sha": "a88726a52ccd79d1a54b306593b7b87ff66dc0eb",
+      "row_count": 93
+    },
+    "MasterLiveMusicScore.json": {
+      "sha256": "77a9656d2e9fa11f5a7dcedc36f383bf47b849fa6368429a48cba44c0c2daf2a",
+      "git_blob_sha": "288dab6c872dac4f61d87e26e9614023dc5c8099",
+      "row_count": 372
+    },
+    "MasterLiveScoreRank.json": {
+      "sha256": "1a9dec745b181ca0e44e44334521019725dec50e0c16169a07c8a8b4d9a83ad3",
+      "git_blob_sha": "059134291de8ecb9461882ee2ab82b0511f028d8",
+      "row_count": 564
+    },
+    "MasterLiveSettings.json": {
+      "sha256": "af959c5fe7d1b3eaa185578d6bb60a0820983ca01f75f75c1ef7f4b64ff43730",
+      "git_blob_sha": "2901d6e4a4db05209603984c161489aba9480931",
+      "row_count": 68
+    },
+    "MasterLiveSkill.json": {
+      "sha256": "67b7d6fe620610e4f7ef9d4b66a10a4d695679b5f358a449632cc0f77d8c40f2",
+      "git_blob_sha": "98f79297f75b3ef49167224a9d9d5f4c367dc456",
+      "row_count": 10
+    },
+    "MasterLiveSkillEffect.json": {
+      "sha256": "e914db7b13d8c3257a74b2ef7eb8f2a6b9a48e2f19c2ffb159d6b14a3fc18a7d",
+      "git_blob_sha": "f9f9ea59fbfb16da7063a55299c75e781d55a8a8",
+      "row_count": 70
+    },
+    "MasterMemberCard.json": {
+      "sha256": "30c649413334187a6bc5b08a3b3f0369c8cbe2fa468e0c46279e89f752768865",
+      "git_blob_sha": "6db9b285f75ae9673c1344bf45eae6d81715086c",
+      "row_count": 74
+    },
+    "MasterParameter.json": {
+      "sha256": "5e09710545cd3b5ba86e790e755a6084b2f754dec3a191b55d4d36e152931d63",
+      "git_blob_sha": "1897fc98b86f8f09c3c8274d3851cf9996320fa3",
+      "row_count": 94
+    },
+    "MasterSkillCondition.json": {
+      "sha256": "d2614078933e23e18df77a0d2d03aaa366bfdf92ce78e130fda435cb3eaf5527",
+      "git_blob_sha": "3fa84b357bcfc2513b8fe3f907bc50a4132eadae",
+      "row_count": 318
+    },
+    "MasterSkillConditionSet.json": {
+      "sha256": "2f69d85991334a7ad452fcb26b40fe3d5fe3547e26c09832b6916f285c1eefd2",
+      "git_blob_sha": "ae5bb6b1e6916ff7f7db49deac077dcb7c44a5f1",
+      "row_count": 427
+    },
+    "MasterSkillCumulativeCondition.json": {
+      "sha256": "1f357d42fc7c3d738c769d24f3ecd1ba57254954adc2cb9a2517b2626c901897",
+      "git_blob_sha": "2e83db16139f4796d4c4d6d7c87ebf8d55c1d195",
+      "row_count": 72
+    },
+    "MasterSound.json": {
+      "sha256": "c8d232c2ad005f3bb721a1847efef1a12f8d0eee7008554ef0379c9c702cb00d",
+      "git_blob_sha": "7e3b81cc392f6ac0cd4b86c6c21f5143519454e6",
+      "row_count": 3489
+    },
+    "MasterSoundCueSheet.json": {
+      "sha256": "ee9710a9daed7bbcb54e138d07b63ef06220f743a9e78a1a508454198aad4741",
+      "git_blob_sha": "9ccb2ada0221eccecf0911860620d9e7de9c1879",
+      "row_count": 411
+    },
+    "MasterSupportCard.json": {
+      "sha256": "9d1eadefab1500e6f99b7945f0e9513e4680f779ac3c32b2189d92f1ba271e9e",
+      "git_blob_sha": "bdb4af1711c8258edc3e6bd228fdbdb4af3851ff",
+      "row_count": 77
+    },
+    "MasterSupportSkill.json": {
+      "sha256": "d26fb0e3ff667c27332716fef7f6c1cb3032f69a3103162ebc261648cf1f6fd9",
+      "git_blob_sha": "795038a3f167b35c30555b8e8222dfb1aae70c51",
+      "row_count": 110
+    },
+    "MasterSupportSkillEffect.json": {
+      "sha256": "04632c26467ed844f76156c2f0966a55b7f3e24296d8d319ddccc7cde0ac3361",
+      "git_blob_sha": "545bced20d9f976d3f174999e420aaa006963f9b",
+      "row_count": 1050
+    },
+    "MasterText.json": {
+      "sha256": "103b4bb331625e9e2833e6502a901201958c4bcba2d0a19d3b813fef5d9ca90c",
+      "git_blob_sha": "52c753caf85f051cc55998aaf5179fb27c2cd953",
+      "row_count": 11152
+    }
+  },
+  "unchanged_tables": {
+    "MasterBand.json": {
+      "sha256": "c243de693d3b45105ffd1bb7a8b8f141773c6d66b6c3d3362f0fa2bd2792a82a",
+      "git_blob_sha": "658e78e2a8b49b6619f3349d1c5a2d442261e9e8"
+    },
+    "MasterBandItem.json": {
+      "sha256": "39bc7d91ba23d47f5c2f6fb18ac405ffbbd080278ede7aad172ef3a792ecfce9",
+      "git_blob_sha": "9b0d65a97e98193a03a3e902bfa27676727f0bbc"
+    },
+    "MasterBandItemLevel.json": {
+      "sha256": "26606e99de42b57811546168cddd691bd5c8b326a47f55b9cb19ed068a6d726c",
+      "git_blob_sha": "4812452353e27ca6e7fbaeb3b11c39cf2a3605ab"
+    },
+    "MasterBandItemSkillEffect.json": {
+      "sha256": "2b5004079ea07073cc5527d85f64ac1d633a9c2317610b45b9c41a657afef4e3",
+      "git_blob_sha": "ecefcc6fc40c891d835519afc69ce165ee7a8762"
+    },
+    "MasterChallengeLiveEventPoint.json": {
+      "sha256": "ee7ddde5531992aedc5ddca3194560b053f292a2ba557ce495f720f7c9efcf47",
+      "git_blob_sha": "10bee6531005e7809481c57e5137642ee3f1c5fe"
+    },
+    "MasterChallengeMusicBoostBonus.json": {
+      "sha256": "7807aba14950eb71d38dab232b307ecbc2f17150672fa933ea7336490c9743a8",
+      "git_blob_sha": "0a33d1aef31614d4d4308c116b4be68b166bdbd2"
+    },
+    "MasterCharacter.json": {
+      "sha256": "f12023b97e52557badb5d7eb4cdde151ad7644568a98fe879de1dcb6de6ed109",
+      "git_blob_sha": "0b867ec4e52df8939fcae0d99e23bd4d712b74e5"
+    },
+    "MasterCharacterFriendshipRank.json": {
+      "sha256": "f2843c6f561b1a5cb4a0e20ae9291a80cace29d811a7b91e36717273a1c8f22b",
+      "git_blob_sha": "b4f1ae2d4e39beaad260604a96e743520e3cbe19"
+    },
+    "MasterCharacterFriendshipRankReward.json": {
+      "sha256": "a7f29c4b4948261c2ad1433a3333a0ed08d561ce76d2d0b0647e96d81bbc0a19",
+      "git_blob_sha": "d3c4b39e2962493f7bf85b99218a1bbe093b9475"
+    },
+    "MasterCharacterRank.json": {
+      "sha256": "8830f4f5bb60c05d454f70dae8b927f1cce26c679194a3224568544637e22c27",
+      "git_blob_sha": "dc820a48c0b641ae55cc1b6195ddba2147fc2234"
+    },
+    "MasterCharacterRankReward.json": {
+      "sha256": "550e46153a023a96eb876a5dd6b9082ee50092e0c0b6d2952fa3247ee80c1caf",
+      "git_blob_sha": "0f929e01c75e03a93a20f7e8890149560e37fba9"
+    },
+    "MasterCharacterTotalRank.json": {
+      "sha256": "ae6e5b9f6b2bf3e1fabdf6396cbb94fdd015830c2bdcd7ddef66486ff879a0c7",
+      "git_blob_sha": "e3c72c4962f07d355643f864cd91102ca4544754"
+    },
+    "MasterEventBoxGacha.json": {
+      "sha256": "3f371f15998e43483a227c073b1b4caa9ed82718e8dbda37b7ec45449d9e5fe4",
+      "git_blob_sha": "27768bf97def5667f6d945c9562e67984ae9b67d"
+    },
+    "MasterEventBoxGachaReward.json": {
+      "sha256": "3f371f15998e43483a227c073b1b4caa9ed82718e8dbda37b7ec45449d9e5fe4",
+      "git_blob_sha": "27768bf97def5667f6d945c9562e67984ae9b67d"
+    },
+    "MasterEventRankingReward.json": {
+      "sha256": "3f371f15998e43483a227c073b1b4caa9ed82718e8dbda37b7ec45449d9e5fe4",
+      "git_blob_sha": "27768bf97def5667f6d945c9562e67984ae9b67d"
+    },
+    "MasterGekisouSkill.json": {
+      "sha256": "1e7cf4f2c730cf838a48d7980354d891e4ccc27e1baa250617ffb097174c32ca",
+      "git_blob_sha": "de449e55eb3e0ca2ee6440a1afc3d8d6553ccb5c"
+    },
+    "MasterGekisouSupportSkill.json": {
+      "sha256": "d5542f9c0dd0c568a32604e8f9eb8fb97b816777478d7ef61b68277072b77c74",
+      "git_blob_sha": "7ecb16a022c31997c3e61ca646a2cb5d41de5663"
+    },
+    "MasterGekisouSupportSkillEffect.json": {
+      "sha256": "1f01ea6a8e0792c01e92051f4e8b67ffae2f63a416c075d75b1fbbee7ee08b37",
+      "git_blob_sha": "5672df336bd053b5e2f6ac3a3d5ca5a7af6b0cd5"
+    },
+    "MasterLiveChallengePoint.json": {
+      "sha256": "c8e04df99852724b0393eaa473daa449d659ff75fa12183650e026fafb935eaa",
+      "git_blob_sha": "bd919402b6ef8c33baf1d519471b987f3b6efb43"
+    },
+    "MasterLiveComboScoreBonus.json": {
+      "sha256": "b47d63be483316f59dcb55cf74df91c0342490e2ddb9e63585b4659feb17ddec",
+      "git_blob_sha": "85cfb63af3deab9c452f82ddc459315ffaa0377e"
+    },
+    "MasterLiveEventPoint.json": {
+      "sha256": "d19fa6683cb3362997654bc003b7057c439ff3956125409f5e13ac107b0fdf75",
+      "git_blob_sha": "34e016eea720e7173144d99ceed43f386e26bf63"
+    },
+    "MasterLiveGekisouCall.json": {
+      "sha256": "48cf4c35e3988b80acfd7bde8ed0a5c645ff69c14f56eded9471e4cede87149a",
+      "git_blob_sha": "92ff97d9a7ec5eabc0f74cada50e10dcf84118c4"
+    },
+    "MasterLiveGekisouLuckBasePoint.json": {
+      "sha256": "e1a9d05f4dc9376b1cfbe1d1a92fb093cd93c96b12c3c4917abf9f02b15c7dc2",
+      "git_blob_sha": "d0f25048bb50a55082c5eded100b80467299a8cd"
+    },
+    "MasterLiveGekisouLuckBonusLot.json": {
+      "sha256": "d8e12aa59ee3e120b70bee9bab091f2c76acaab51f60d822f9a0372b45da06a0",
+      "git_blob_sha": "29fc2c21dd757bd93ab3ec3e36696570cc5417b6"
+    },
+    "MasterLiveGekisouRankingScoreBonus.json": {
+      "sha256": "2d663396d6d5d5f643561210bf4922561e75812eb16974d173df1880d2780525",
+      "git_blob_sha": "e3b7430e34f2ebbfd0f0d662a753bbaa37ef0f37"
+    },
+    "MasterLiveJudgementParameter.json": {
+      "sha256": "0ba32201df369b85ba47b34e4b22f778cb7edab04cc39e15ffdef383f9662e99",
+      "git_blob_sha": "645b6cd3419cc70d3fb638a03502546a9bc97343"
+    },
+    "MasterLiveMusicBoostBonus.json": {
+      "sha256": "e1b7615c10beffd678f5a4960e53ea6ee8a71fc3174113faa490b58a347142c0",
+      "git_blob_sha": "f69050829e1acacc1af9f06db0c1849a382f31a9"
+    },
+    "MasterLiveNoteParameter.json": {
+      "sha256": "65dab9f1eae66e40ac8ca33130963f26b8f25a457ab47777a92661db4b132f44",
+      "git_blob_sha": "006ef325c5c6833a4c60144522dd45ebeb04e9e8"
+    },
+    "MasterMemberCardAwake.json": {
+      "sha256": "27511ce2e7a376f4f07476c4350c905a2890ca2d9a735b556be24e45ab82d688",
+      "git_blob_sha": "51d3619d334dd7bac5937ce0dfd778d8449023a1"
+    },
+    "MasterMemberCardLevel.json": {
+      "sha256": "b30b80d50dbd6d0ed98a1f96c1c855ed5553499a84ea79cc76d5cc72c4b3efc3",
+      "git_blob_sha": "f89f3989991e620c2cfc474309cf628417cdc253"
+    },
+    "MasterMemberCardLevelLimit.json": {
+      "sha256": "e1fe3cffe7fa8d9bde31b865f7555b4b2df607572a93c49841cd64d1891a3fca",
+      "git_blob_sha": "d43eb18c3bbad1eb99b9daf64239e1d63d520dc9"
+    },
+    "MasterMemberCardRank.json": {
+      "sha256": "083666233f3fa3335ed199b3680a03214981e78bcd04aeb1ef5cc30a7367f45e",
+      "git_blob_sha": "2a884efcd299104310bdbab556c1b27dc318ae71"
+    },
+    "MasterMemoryMemberLevel.json": {
+      "sha256": "3f371f15998e43483a227c073b1b4caa9ed82718e8dbda37b7ec45449d9e5fe4",
+      "git_blob_sha": "27768bf97def5667f6d945c9562e67984ae9b67d"
+    },
+    "MasterMemoryMusicBonus.json": {
+      "sha256": "3f371f15998e43483a227c073b1b4caa9ed82718e8dbda37b7ec45449d9e5fe4",
+      "git_blob_sha": "27768bf97def5667f6d945c9562e67984ae9b67d"
+    },
+    "MasterMemorySupportLevel.json": {
+      "sha256": "3f371f15998e43483a227c073b1b4caa9ed82718e8dbda37b7ec45449d9e5fe4",
+      "git_blob_sha": "27768bf97def5667f6d945c9562e67984ae9b67d"
+    },
+    "MasterSkillEffectSetting.json": {
+      "sha256": "48a7ed40d0b3796559ba7a8683fb7617e6cfc57671967c773ffb3335dcc48f98",
+      "git_blob_sha": "aed082fee4e9206cd51e4540ce7a584b70cb03cd"
+    },
+    "MasterSkillTarget.json": {
+      "sha256": "7179bb704e342f93cece46e9f6151369182272c45aa9e8672666123b9400117b",
+      "git_blob_sha": "f14632de6dd0a37e32ce7e6c18640680e3e18292"
+    },
+    "MasterSupportCardLevel.json": {
+      "sha256": "e64bf4ce1687dbdda3ec86d5f044bbfc363d2a0829eeaf424258af442f7a39cb",
+      "git_blob_sha": "414d03841598dbcb9d525b71b2d50e44e53c6947"
+    },
+    "MasterSupportCardRank.json": {
+      "sha256": "7f21a3fd0d06fca5c0cbfb045fbf569e1ebacb622de2c24c229767ece9724b3f",
+      "git_blob_sha": "a8ababdbd5b1ffb44c5d85d3ebdd487b351ed1c9"
+    },
+    "MasterTag.json": {
+      "sha256": "950f906b89f5f2c65b39737457f341728bae5d18f3f3d1f31b9ca1043d98fa43",
+      "git_blob_sha": "5e5e896f2ab9f94cfe9ac97851ac68cc226ec647"
+    },
+    "MasterVipRankBonus.json": {
+      "sha256": "0d604d5dd55fd232e9ebfb99b971ed7cb9f3c5e418589515677a4bdde6d8201d",
+      "git_blob_sha": "b99c56a79af247afa4a7bb27f7d1afb9604164cb"
+    }
+  },
+  "images": [
+    {
+      "kind": "members",
+      "id": 71,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/MemberCard/71/member_thumbnail.png",
+      "source_sha256": "a7b1b5c8c7ab92f21b986ac8a33e1bae658f7cf024ab028f16f7c859a0edd6ae",
+      "source_file": "source_images/members-71.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "members-71.webp",
+      "sha256": "85605193f6c4a58a8e901d90caeda5d2357b49cf28b059095edc8fadb5792dc9",
+      "bytes": 66658
+    },
+    {
+      "kind": "members",
+      "id": 72,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/MemberCard/72/member_thumbnail.png",
+      "source_sha256": "9b18facb05331b431cd07612b8c3cd8390eecd285071faa8aa40a3ff24a4aca6",
+      "source_file": "source_images/members-72.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "members-72.webp",
+      "sha256": "d89c57cb06d8c3c61d112bb88da5661201743c67efeddf074e5b5045c5164130",
+      "bytes": 66058
+    },
+    {
+      "kind": "members",
+      "id": 73,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/MemberCard/73/member_thumbnail.png",
+      "source_sha256": "9a638ef920b9995dedf09da60720247560a8001357148e13460130a8b9e9327f",
+      "source_file": "source_images/members-73.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "members-73.webp",
+      "sha256": "a11f6ddabb6494bdd76fa9e44d222d0be1eb004e6ed97ac65e1cdb8ea10f183f",
+      "bytes": 68290
+    },
+    {
+      "kind": "members",
+      "id": 74,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/MemberCard/74/member_thumbnail.png",
+      "source_sha256": "5654b95ca7a29f9fe4925576199a2ad89a7594f445b117682aa430fdc231cc6e",
+      "source_file": "source_images/members-74.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "members-74.webp",
+      "sha256": "11c747400f9937040f7948b354bccfac7a8d371f5cb0e0b030df0846aa3296cf",
+      "bytes": 59128
+    },
+    {
+      "kind": "snaps",
+      "id": 70,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/SupportCard/70/snap_thumbnail.png",
+      "source_sha256": "35e0c723efbf6addd8b09f60bbe895ffdc681f3391e1f5ac7f26170b842b01aa",
+      "source_file": "source_images/snaps-70.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "snaps-70.webp",
+      "sha256": "31fbddbc20dbeb3db0a1bfa18ac20bf2cfe9953da2038209ece11bfe5d01b9ab",
+      "bytes": 65504
+    },
+    {
+      "kind": "snaps",
+      "id": 74,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/SupportCard/74/snap_thumbnail.png",
+      "source_sha256": "4f9045b3ab0f270d14496142195a226eae8e9abb1401af83991e9fc58b2cc517",
+      "source_file": "source_images/snaps-74.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "snaps-74.webp",
+      "sha256": "f9af98d6e5b176ed10f36c48f06a6435d0872a4cdb5ff2142c3183fc364ae0e5",
+      "bytes": 46864
+    },
+    {
+      "kind": "snaps",
+      "id": 75,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/SupportCard/75/snap_thumbnail.png",
+      "source_sha256": "043df8f9c58ca8cde9756bc50b415ffabaeab4955d9e66cb7e6d5822cf00ec9d",
+      "source_file": "source_images/snaps-75.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "snaps-75.webp",
+      "sha256": "a758b644f5286b20c65123447cb458922faaadf153c6f82e26c7eb675554a2ae",
+      "bytes": 54916
+    },
+    {
+      "kind": "snaps",
+      "id": 76,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/SupportCard/76/snap_thumbnail.png",
+      "source_sha256": "57f09e0bc54ec247b9145f0b55b76bf0717660929a758235822368668a7aeb85",
+      "source_file": "source_images/snaps-76.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "snaps-76.webp",
+      "sha256": "f180e9237616f760198df18bf6f05ea550672b77a3f7a9be057e4940e38207c7",
+      "bytes": 49240
+    },
+    {
+      "kind": "snaps",
+      "id": 77,
+      "source_url": "https://haneoka.org/assets/jp/Assets/AddressableResources/SupportCard/77/snap_thumbnail.png",
+      "source_sha256": "33d60066cb777ea45e51a13f9c37720d3a4876a0a8cfaacdec221dbb4989c30d",
+      "source_file": "source_images/snaps-77.png",
+      "conversion": "cwebp -q 90 -m 6",
+      "file": "snaps-77.webp",
+      "sha256": "cb694ced4033c778f2c7f56a206bd86783bf4c378b5784bd5f2f921bb0c7f121",
+      "bytes": 48402
+    }
+  ]
+}

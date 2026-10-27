@@ -21,7 +21,7 @@ from reward_preview import preview_challenge_rewards
 
 
 MODEL_COMMIT = "dbd9cf01a4854808dceb6aedcd4041af372faeee"
-DATA_COMMIT = "afe0f81f9fde53512febd37c5ec7702c766aee48"
+DATA_COMMIT = "e262c0db822728edb0b2fb89c5f134237740b1e7"
 TABLES = ("MasterLiveMusic", "MasterLiveMusicScore", "MasterLiveScoreRank",
           "MasterChallengeMusic", "MasterLiveSettings", "MasterLiveNoteParameter",
           "MasterLiveJudgementParameter", "MasterLiveComboScoreBonus")
@@ -185,6 +185,62 @@ def ap_factor_samples(prepared: dict, skills: list[dict], order: tuple[int, ...]
                                prepared["music_length_ms"], channels=True)
     cursor, note, perfect = 0, f32(1), f32(0)
     for (time, _id, op), base in zip(prepared["notes"], prepared["combo_bases"], strict=True):
+        while cursor < len(commands) and commands[cursor][0] <= time:
+            command = commands[cursor]
+            amount = f32(f32(command[2]) / f32(100000))
+            if command[3] == 0:
+                if amount != 0:
+                    note = f32(note + amount)
+            else:
+                perfect = f32(perfect + amount)
+            cursor += 1
+        yield op, base, f32(note + perfect)
+
+
+def chart_time_commands(prepared: dict, skills: list[dict], order: tuple[int, ...]):
+    """Add cumulative Snap factors to the established chart-time AP model.
+
+    Each timestamp is a judgement update: simultaneous PERFECTs are counted
+    together before score commands at that timestamp. This is not a frame replay.
+    full/conditions.rs::JudgementPerN caps the count; full/mod.rs::
+    apply_cumulative_score removes the previous factor before adding the new one.
+    """
+    from collections import Counter
+    commands = factor_commands(prepared['skill_time_ms'], skills, order,
+                               prepared['music_length_ms'], channels=True)
+    if not any(slot.get('active_support_effects') for slot in skills):
+        return commands
+    counts = sorted(Counter(t for t, _, _ in prepared['notes']).items())
+    for event_index, slot in enumerate(order):
+        start = prepared['skill_time_ms'][event_index]
+        owner = event_index * 100 + 2
+        for row in skills[slot].get('active_support_effects', []):
+            if row['skill_effect_type'] != 2001:
+                raise ValueError('Unsupported cumulative Snap score effect')
+            end = min(start + row['activation_ms'], prepared['music_length_ms'])
+            counted, previous = 0, 0
+            for time, count in counts:
+                if time < start:
+                    continue
+                if time >= end:
+                    break
+                counted += count
+                steps = min(counted // row['notes_per_step'], row['max_count'])
+                value = min(row['effect_value'] * steps, row['max_effect_value'])
+                mill = math.floor(f32(f32(f32(value) / f32(10000)) * f32(100000)))
+                if mill != previous:
+                    # Keep disable/add separate: combining deltas changes f32.
+                    commands.extend(((time, owner, -previous, 0), (time, owner, mill, 0)))
+                    previous = mill
+            if previous:
+                commands.append((end, owner, -previous, 0))
+    return sorted(commands, key=lambda command: (command[0], command[1]))
+
+
+def cumulative_ap_factor_samples(prepared: dict, skills: list[dict], order: tuple[int, ...]):
+    commands = chart_time_commands(prepared, skills, order)
+    cursor, note, perfect = 0, f32(1), f32(0)
+    for (time, _id, op), base in zip(prepared['notes'], prepared['combo_bases'], strict=True):
         while cursor < len(commands) and commands[cursor][0] <= time:
             command = commands[cursor]
             amount = f32(f32(command[2]) / f32(100000))

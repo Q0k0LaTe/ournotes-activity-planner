@@ -1,6 +1,6 @@
-# 配队工作台浏览器适配 · v0.3.4
+# 配队工作台浏览器适配 · v0.3.5
 
-本版接入 2026-10-18 日服活动 #3、成员与留影新卡、两首歌曲和 8 张谱面；国际服留影 #70「Abracadabra」继续保留，活动 #1、#2 的奖励留在历史记录。参阅 [仓库 README](../README.md)、[开发说明](../guides/DEVELOPMENT.md) 和 [验证说明](../guides/VALIDATION.md)。
+本版接入 2026-10-27 日服活动 #4、成员与留影新卡、四首歌曲和 16 张谱面；留影 #70「Abracadabra」现使用日服原生数据，活动 #1–#3 的奖励留在历史记录。参阅 [仓库 README](../README.md)、[开发说明](../guides/DEVELOPMENT.md) 和 [验证说明](../guides/VALIDATION.md)。
 
 在此目录运行 `npx pnpm@11.19.0 install --frozen-lockfile`、`npx pnpm@11.19.0 build`，然后用 `python -B tests/preview_server.py` 本地预览。
 

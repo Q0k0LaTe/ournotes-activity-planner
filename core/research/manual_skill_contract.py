@@ -16,12 +16,13 @@ from pathlib import Path
 import struct
 
 
-DATA_COMMIT = "afe0f81f9fde53512febd37c5ec7702c766aee48"
+DATA_COMMIT = "e262c0db822728edb0b2fb89c5f134237740b1e7"
 MODEL_COMMIT = "dbd9cf01a4854808dceb6aedcd4041af372faeee"
 TABLES = (
     "MasterMemberCard", "MasterSupportCard", "MasterSupportCardRank",
     "MasterLiveSkillEffect", "MasterSupportSkillEffect", "MasterSkillConditionSet",
     "MasterSkillCondition", "MasterSkillTarget", "MasterCharacter",
+    "MasterSkillCumulativeCondition",
     "MasterLiveJudgementParameter", "MasterLiveSettings",
 )
 MODEL_PATHS = (
@@ -195,7 +196,7 @@ def _condition_group(tables: dict, group: int, band_id: int, purpose: str) -> di
             if type(positive) is not bool:
                 raise ValueError(f"Condition {cid} polarity is not boolean")
             details = {}
-            if kind == 4010 and purpose == "trigger":
+            if kind == 4010 and purpose in ("trigger", "conversion"):
                 if values or tids or not positive:
                     raise ValueError(f"Unsupported same-member trigger condition {cid}")
                 answer = True
@@ -220,6 +221,18 @@ def _condition_group(tables: dict, group: int, band_id: int, purpose: str) -> di
                 details = {"life_test_interval": [BASE_LIFE, OVERHEAL_CAP],
                            "threshold": threshold, "interval_answer_is_constant": True,
                            "basis": "conditions.rs::LifeAtLeast/AtMost and polarity; life.rs recovery may over-heal"}
+            elif kind == 1020 and purpose == "release":
+                # Halloween Taki's extra score effect ends on GOOD or worse.
+                # conditions.rs compares the converted judgement with <=;
+                # raw PERFECT (5) never meets a positive threshold below 5.
+                targets = [_unique(tables["MasterSkillTarget"], f"target {tid}", _id=tid) for tid in tids]
+                if values or not positive or not targets or any(
+                        target["_skillTargetType"] != 4 or not 1 <= target["_judgement"] < PERFECT
+                        for target in targets):
+                    raise ValueError(f"Release condition {cid} is not invariant under raw PERFECT")
+                answer = False
+                details = {"raw_targets": targets, "raw_judgement": PERFECT,
+                           "basis": "conditions.rs::NoteJudgementMatch type1020: PERFECT exceeds every release threshold"}
             else:
                 raise ValueError(f"Unsupported condition type {kind} in {purpose} group {group}")
             matched = answer if positive else not answer
@@ -231,8 +244,12 @@ def _condition_group(tables: dict, group: int, band_id: int, purpose: str) -> di
             "basis": "conditions.rs::Factory::group: OR of sets, each AND of conditions"}
 
 
-def _check_state_fields(row: dict, allow_conversion_limit: bool = False) -> None:
-    if any(row[field] != 0 for field in UNSUPPORTED_STATE_FIELDS):
+def _check_state_fields(row: dict, allow_conversion_limit: bool = False,
+                        allow_release_condition: bool = False,
+                        allow_conversion_execution_limit: bool = False) -> None:
+    if any(row[field] != 0 for field in UNSUPPORTED_STATE_FIELDS
+           if not ((allow_release_condition and field == "_skillReleaseConditionGroup")
+                   or (allow_conversion_execution_limit and field == "_effectExecuteLimitCount"))):
         raise ValueError(f"Effect {row['_id']} has an unsupported release/cumulative/execute-limit state")
     limit = _integer(row["_effectLimitCount"], f"Effect {row['_id']} conversion limit")
     if limit and not allow_conversion_limit:
@@ -286,7 +303,7 @@ def derive_ap_skill_contract(snapshot: Path | str, profile: dict,
         snap_level = _integer(snap_owned.get("level"), f"Snap {snap_id} actual level", 1)
         if snap_level > rank["_limitLevel"]:
             raise ValueError(f"Snap {snap_id} level exceeds its actual limit-break cap")
-        support_skills, extension = [], _f32(0)
+        support_skills, support_scores, extension = [], [], _f32(0)
         for suffix in ("01", "02"):
             support_id = snap[f"_supportSkillId{suffix}"]
             if support_id == 0:
@@ -300,14 +317,33 @@ def derive_ap_skill_contract(snapshot: Path | str, profile: dict,
             checks = []
             for row in rows:
                 kind = row["_skillEffectType"]
-                if kind not in (15000, 3001, 12006):
+                if kind not in (15000, 3001, 12006, 2001):
                     raise ValueError(f"Unsupported support effect type {kind} in row {row['_id']}")
-                _check_state_fields(row, allow_conversion_limit=kind == 12006)
+                if kind == 2001:
+                    cumulative = _unique(tables['MasterSkillCumulativeCondition'], 'AP cumulative support',
+                                         _id=row['_skillCumulativeConditionID'])
+                    targets = [_unique(tables['MasterSkillTarget'], 'AP cumulative target', _id=tid)
+                               for tid in cumulative['_conditionTargetIDs']]
+                    values = cumulative['_conditionValues']
+                    if (cumulative['_skillCumulativeConditionType'] != 1000 or len(values) != 1
+                            or type(values[0]) is not int or values[0] <= 0 or not targets
+                            or any(t['_skillTargetType'] != 4 or t['_judgement'] not in (5, 6) for t in targets)
+                            or not any(t['_judgement'] == PERFECT for t in targets)
+                            or cumulative['_maxCumulativeCount'] <= 0 or row['_maxEffectValue'] <= 0
+                            or row['_skillTargetIDs']):
+                        raise ValueError(f"Unsupported AP cumulative support row {row['_id']}")
+                    _check_state_fields({**row, '_skillCumulativeConditionID': 0, '_maxEffectValue': 0})
+                else:
+                    _check_state_fields(row, allow_conversion_limit=kind == 12006,
+                                        allow_conversion_execution_limit=kind == 12006)
                 if row["_skillTriggerType"] != 1:
                     raise ValueError(f"Support effect {row['_id']} is not the covered one-shot trigger")
                 value = _integer(row["_effectValue"], f"Effect {row['_id']} value")
                 duration = _base_activation_ms(row)
-                trigger = _condition_group(tables, row["_skillTriggerConditionGroup"], band_id, "trigger")
+                # A conversion that never targets raw PERFECT cannot alter this
+                # AP baseline, even when activated by a static band condition.
+                trigger_purpose = 'conversion' if kind == 12006 else 'trigger'
+                trigger = _condition_group(tables, row["_skillTriggerConditionGroup"], band_id, trigger_purpose)
                 condition = _condition_group(tables, row["_skillConditionGroup"], band_id, "support")
                 applicable = trigger["matched"] and condition["matched"]
                 targets = []
@@ -320,15 +356,23 @@ def derive_ap_skill_contract(snapshot: Path | str, profile: dict,
                         "Extend this bound member's running live effects only; milliseconds are added in float32"
                         if kind == 15000 else
                         "Recovery allows over-heal to 2000; raw Perfect has zero damage. Life stays positive and all supported life predicates are invariant on 1000..2000, so score factors do not change")
-                else:
-                    if value != PERFECT or duration <= 0 or not row["_skillTargetIDs"]:
+                elif kind == 12006:
+                    if value not in (3, PERFECT) or duration <= 0 or not row["_skillTargetIDs"]:
                         raise ValueError(f"Unsupported conversion destination/window in row {row['_id']}")
                     for tid in row["_skillTargetIDs"]:
                         target = _unique(tables["MasterSkillTarget"], f"conversion target {tid}", _id=tid)
-                        if target["_skillTargetType"] != 4 or target["_judgement"] not in (3, 4):
-                            raise ValueError(f"Conversion row {row['_id']} has a target outside raw Good/Great")
+                        if target["_skillTargetType"] != 4 or target["_judgement"] not in (1, 2, 3, 4):
+                            raise ValueError(f"Conversion row {row['_id']} can affect raw PERFECT or an unknown judgement")
                         targets.append(target)
-                    simplification = "Only raw Good/Great targets convert to Perfect; every raw judgement in this AP baseline is already Perfect, so no conversion or limit consumption occurs"
+                    simplification = "All conversion targets are below PERFECT; raw AP never converts or consumes a conversion limit, regardless of its activation/execute limit"
+                else:
+                    if duration <= 0:
+                        raise ValueError('Cumulative score support requires a positive window')
+                    if applicable:
+                        support_scores.append({'effect_row_id': row['_id'], 'skill_effect_type': kind,
+                            'effect_value': value, 'activation_ms': duration, 'notes_per_step': values[0],
+                            'max_count': cumulative['_maxCumulativeCount'], 'max_effect_value': row['_maxEffectValue']})
+                    simplification = 'AP chart-time estimate: count PERFECT judgements during the bound live event; cap each cumulative increment; Snap score windows are not extended'
                 checks.append({"effect_row_id": row["_id"], "skill_effect_type": kind,
                                "raw_effect": row, "applicable": applicable,
                                "trigger_proof": trigger, "condition_proof": condition,
@@ -343,7 +387,12 @@ def derive_ap_skill_contract(snapshot: Path | str, profile: dict,
             kind = row["_skillEffectType"]
             if kind not in (2000, 2004):
                 raise ValueError(f"Unsupported live effect type {row['_skillEffectType']} in row {row['_id']}")
-            _check_state_fields(row)
+            release = None
+            if row["_skillReleaseConditionGroup"]:
+                release = _condition_group(tables, row["_skillReleaseConditionGroup"], band_id, "release")
+                if release["matched"]:
+                    raise ValueError(f"Live effect {row['_id']} can end during the AP baseline")
+            _check_state_fields(row, allow_release_condition=release is not None)
             if kind == 2000 and row["_skillTargetIDs"]:
                 raise ValueError(f"Unsupported targeted live score effect {row['_id']}")
             targets = []
@@ -362,6 +411,7 @@ def derive_ap_skill_contract(snapshot: Path | str, profile: dict,
             proof = _condition_group(tables, row["_skillConditionGroup"], band_id, "live")
             live_checks.append({"effect_row_id": row["_id"], "raw_effect": row,
                                 "applicable": proof["matched"], "condition_proof": proof,
+                                **({"release_proof": release} if release is not None else {}),
                                 "raw_targets": targets,
                                 "ap_target_count": sum(t["_judgement"] == PERFECT for t in targets),
                                 "target_basis": "skill.rs::apply_factor: separate PERFECT accumulator, raw AP judgement=5"})
@@ -376,6 +426,7 @@ def derive_ap_skill_contract(snapshot: Path | str, profile: dict,
             "character_id": character["_id"], "band_id": band_id,
             "live_skill_id": skill_id, "live_skill_level": skill_level,
             "extension_ms": extension, "active_live_effects": active,
+            **({'active_support_effects': support_scores} if support_scores else {}),
             "live_effects": [{**r, "effective_activation_ms": math.ceil(_f32(r["activation_ms"] + extension))}
                              for r in active],
             "live_effect_checks": live_checks, "support_skills": support_skills,

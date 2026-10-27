@@ -31,6 +31,12 @@ def increments(slot):
         for target in targets:
             if target in (0, 5):
                 result.append((math.ceil(duration), numerator * (QUANTUM // denominator)))
+    for effect in slot.get('active_support_effects', []):
+        value = min(effect['effect_value'] * effect['max_count'], effect['max_effect_value'])
+        scaled = cp._float32(cp._float32(cp._float32(value) / cp._float32(10000)) * cp._float32(100000))
+        q = cp._float32(cp._float32(math.floor(scaled)) / cp._float32(100000))
+        numerator, denominator = q.as_integer_ratio()
+        result.append((effect['activation_ms'], numerator * (QUANTUM // denominator)))
     return result
 
 
@@ -46,6 +52,13 @@ def pool_upper_signature(chart, options):
     # once more. Include that addition even for a pool of AP-inactive effects.
     n = 1 + 2 * sum(max(len(rows) for rows in pool) for pool in parts)
     absolute = QUANTUM + 2 * sum(max(sum(q for _, q in rows) for rows in pool) for pool in parts)
+    # Ramp updates disable/add separately. Bound their rounding even though the
+    # envelope above grants the capped factor for the entire support window.
+    for pools, bounded in zip(options, parts, strict=True):
+        updates = max(sum(2 * row['max_count'] for row in slot.get('active_support_effects', []))
+                      for slot in pools)
+        n += updates
+        absolute += updates * max(sum(q for _, q in rows) for rows in bounded)
     exponent = (2 * absolute - 1).bit_length() - 149
     ulp = 1 << (exponent - 23 + 149)
     if n > 10000 or n * ulp > absolute:

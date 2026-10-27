@@ -6,6 +6,7 @@ import json
 import re
 import zipfile
 from optimized_sources import sources
+from game_updates import LATEST
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,10 +21,7 @@ def verify(site):
         raise ValueError("Public baseline SHA-256 mismatch")
     if (info["browser_version"], info["core_version"], info["public_source_sha256"]) != (package["version"], config["version"], config["sha256"]):
         raise ValueError("Site version or baseline differs from source")
-    card_patch = ROOT / "data_updates/2026-10-11/snap-70.json"
-    if info["card_update"]["payload_sha256"] != hashlib.sha256(card_patch.read_bytes()).hexdigest():
-        raise ValueError("Abracadabra update differs from source")
-    game_patch = ROOT / "data_updates/2026-10-18/manifest.json"
+    game_patch = LATEST / "manifest.json"
     if info["game_update"]["payload_sha256"] != hashlib.sha256(game_patch.read_bytes()).hexdigest():
         raise ValueError("Current JP game update differs from source")
     files = {p.relative_to(site).as_posix(): p for p in site.rglob("*") if p.is_file()}

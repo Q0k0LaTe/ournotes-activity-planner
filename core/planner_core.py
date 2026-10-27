@@ -33,7 +33,7 @@ import score_intervals
 from performance_trace import Trace
 
 VERSION = "0.2.5"
-ACTIVE_EVENT_ID = 3
+ACTIVE_EVENT_ID = 4
 ORDERS = tuple(itertools.permutations(range(5)))
 RANKS = ("D", "C", "B", "A", "S", "SS")
 # Memory budget for matching states, never a limit on the candidate pool.
@@ -71,10 +71,10 @@ def demo_profile():
             "candidate_snap_ids": [33, 37, 52, 61, 3] if has_sample else [],
             "settings": {"boost_budget": 20, "boost_per_live": 4, "starting_cp": 0,
                          "challenge_cp": 200,
-                         "normal": {"song_id": 100114, "difficulty": "expert", "method": "ap",
-                                    "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100081, 100104, 100114)]},
-                         "challenge": {"song_id": 100114, "difficulty": "expert", "method": "ap",
-                                       "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100081, 100104, 100114)]}},
+                         "normal": {"song_id": 100115, "difficulty": "expert", "method": "ap",
+                                    "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100005, 100029, 100115, 100118)]},
+                         "challenge": {"song_id": 100115, "difficulty": "expert", "method": "ap",
+                                       "sheets": [{"song_id": i, "difficulty": "expert"} for i in (100005, 100029, 100115, 100118)]}},
             "schema_version": 1, "is_demo": has_sample}
 
 
@@ -83,7 +83,7 @@ class Data:
     def __init__(self, snapshot=SNAPSHOT):
         self.snapshot = Path(snapshot)
         self.manifest, self.tables = dp._snapshot(self.snapshot)
-        self.snapshot_label = "2026-10-18 · 活动 #3"
+        self.snapshot_label = "2026-10-27 · 活动 #4"
         self.event_id = ACTIVE_EVENT_ID
         self.skill_inputs = sk._load(self.snapshot.resolve())
         # The skill loader verifies formation groups. Additional cumulative and
@@ -578,19 +578,25 @@ class Scores:
         # All 120 orders are evaluated: relabelling performers cannot change
         # min/max. Keep effect order within each performer (f32 ties matter).
         return tuple(sorted((s["extension_ms"], tuple((e["skill_effect_type"], tuple(e.get("judgement_targets", [])), e["effect_value"], e["activation_ms"])
-                                                     for e in s["active_live_effects"])) for s in slots))
+                                                     for e in s["active_live_effects"]),
+                             tuple((e['skill_effect_type'], e['effect_value'], e['activation_ms'],
+                                    e['notes_per_step'], e['max_count'], e['max_effect_value'])
+                                   for e in s.get('active_support_effects', []))) for s in slots))
 
     def order_signature(self, slots, order):
         p = self.chart
         active_commands = 2 * sum(1 if effect["skill_effect_type"] == 2000 else
                                 sum(target == 5 for target in effect.get("judgement_targets", []))
                                 for slot in slots for effect in slot["active_live_effects"])
+        active_commands += sum(2 * effect['max_count'] + 2
+                               for slot in slots for effect in slot.get('active_support_effects', []))
         if self.use_intervals and len(self.note_index) * max(1, active_commands) <= 2 * len(p["notes"]):
             self.metrics.count("interval_signatures")
             return score_intervals.signature(p, slots, order, self.note_index)
         self.metrics.count("scan_signatures")
         counts = Counter()
-        for op, base, factor in ms.ap_factor_samples(p, slots, order):
+        samples = ms.cumulative_ap_factor_samples if any(s.get('active_support_effects') for s in slots) else ms.ap_factor_samples
+        for op, base, factor in samples(p, slots, order):
             counts[p["note_percents"][op], base, factor] += 1
         return tuple(counts.items())
 
@@ -1102,8 +1108,9 @@ def evaluate_song(data, model, profile, spec, mode, sets, snap_sets, pair_cache,
                         except ValueError as e:
                             raise InputError(f"当前 AP 模型尚未覆盖这组技能：{e}。可选择跳过参考，或调整候选卡。不会把该技能当作零效果。") from e
                         for slot in contract["slots"]:
-                            pair_cache[slot["member_id"], slot["snap_id"]] = {"extension_ms": slot["extension_ms"],
-                                                                           "active_live_effects": slot["active_live_effects"]}
+                            pair_cache[slot["member_id"], slot["snap_id"]] = {
+                                "extension_ms": slot["extension_ms"], "active_live_effects": slot["active_live_effects"],
+                                **({"active_support_effects": slot["active_support_effects"]} if slot.get("active_support_effects") else {})}
                 for mid in members:
                     for sid in snap_sets.ids:
                         signature = Scores.skill_key([pair_cache[mid, sid]])[0]
@@ -1290,7 +1297,7 @@ def calibration(data=None):
                                        "challenge_rank": "B", "challenge_event_pt": 5304, "challenge_shop_pt": 8160,
                                        "challenge_cp_gained": 0, "normal_event_pt": 1442, "normal_shop_pt": 2100,
                                        "normal_cp": 100},
-            "notes": ["历史活动 #1 的综合力与挑战收益匹配已核对的截图；活动 #3 尚无实机结算校准。",
+            "notes": ["历史活动 #1 的综合力与挑战收益匹配已核对的截图；活动 #4 尚无实机结算校准。",
                       "200 CP 是与 1 倍收益相符的模型输入，实际扣费未由结算截图直接显示。",
                       "普通演出截图为另一组未知队伍；只用于核对收益，不能当作当前队伍的普通演出实测。",
                       "后续搜索结果均为模型估算；截图示例不等于你的完整卡库。"]}

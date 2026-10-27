@@ -145,7 +145,8 @@ class Search:
                     raise p.InputError(f"当前 AP 模型尚未覆盖这组技能：{e}。可选择跳过参考，或调整候选卡。不会把该技能当作零效果。") from e
                 for slot in contract["slots"]:
                     self.pairs[slot["member_id"], slot["snap_id"]] = {
-                        "extension_ms": slot["extension_ms"], "active_live_effects": slot["active_live_effects"]}
+                        "extension_ms": slot["extension_ms"], "active_live_effects": slot["active_live_effects"],
+                        **({"active_support_effects": slot["active_support_effects"]} if slot.get("active_support_effects") else {})}
         if len(self.pairs) != len(self.mids) * len(self.sids):
             raise RuntimeError("Incomplete AP pair preflight")
 

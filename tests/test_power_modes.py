@@ -30,7 +30,7 @@ class PowerModeTests(unittest.TestCase):
     def model(self):
         return p.PowerModel(self.data, self.profile, self.mids, self.sids)
 
-    def fixed_power(self, model, challenge, song=100114, snaps=None, leader=55):
+    def fixed_power(self, model, challenge, song=100115, snaps=None, leader=55):
         model.music(song, challenge)
         rates = p.leader_rates(self.data, model.cards[leader], model.own[leader],
                                [model.cards[m] for m in self.mids],
@@ -49,34 +49,40 @@ class PowerModeTests(unittest.TestCase):
         self.assertIn("ハイスコアなどの記録は更新されません", help_text)
 
     def test_same_song_team_and_leader_change_power_but_keep_currency_bonuses(self):
-        model = self.model()
-        normal = self.fixed_power(model, False)
-        normal_type, bonuses = model.music_type, model.bonuses(self.mids, self.sids)
-        challenge = self.fixed_power(model, True)
-        self.assertEqual(model.music_type, normal_type)  # Isolate event parameters.
-        self.assertLess(normal, challenge)
-        self.assertEqual(model.bonuses(self.mids, self.sids), bonuses)
-        self.assertGreater(bonuses["event_pt"], 0)
-        self.assertGreater(bonuses["shop_pt"], 0)
-        # Search and solver alternate modes on the same model instance.
-        self.assertEqual(self.fixed_power(model, False), normal)
-        self.assertEqual(self.fixed_power(model, True), challenge)
+        # Isolate parameter bonuses from event #4's separate all-type rule.
+        rows = [dict(row, _musicType=0) for row in self.data.tables['MasterChallengeMusic']]
+        with patch.dict(self.data.tables, MasterChallengeMusic=rows):
+            model = self.model()
+            normal = self.fixed_power(model, False)
+            normal_type, bonuses = model.music_type, model.bonuses(self.mids, self.sids)
+            challenge = self.fixed_power(model, True)
+            self.assertEqual(model.music_type, normal_type)  # Isolate event parameters.
+            self.assertLess(normal, challenge)
+            self.assertEqual(model.bonuses(self.mids, self.sids), bonuses)
+            self.assertGreater(bonuses["event_pt"], 0)
+            self.assertGreater(bonuses["shop_pt"], 0)
+            # Search and solver alternate modes on the same model instance.
+            self.assertEqual(self.fixed_power(model, False), normal)
+            self.assertEqual(self.fixed_power(model, True), challenge)
 
     def test_ordinary_matches_challenge_with_only_parameter_bonuses_removed(self):
-        bonuses = deepcopy(p.eb.calculate_deck_bonuses(self.data.snapshot, self.profile, self.mids, self.sids,
-                                                        self.data.event_id))
-        for kind in ("members", "snaps"):
-            for row in bonuses[kind]:
-                row["parameter_bonus_10000"] = 0
-        normal = self.fixed_power(self.model(), False)
-        with patch.object(p.eb, "calculate_deck_bonuses", return_value=bonuses):
-            expected = self.fixed_power(self.model(), True)
-        self.assertEqual(normal, expected)
+        # Isolate parameter bonuses from event #4's separate all-type rule.
+        rows = [dict(row, _musicType=0) for row in self.data.tables['MasterChallengeMusic']]
+        with patch.dict(self.data.tables, MasterChallengeMusic=rows):
+            bonuses = deepcopy(p.eb.calculate_deck_bonuses(self.data.snapshot, self.profile, self.mids, self.sids,
+                                                            self.data.event_id))
+            for kind in ("members", "snaps"):
+                for row in bonuses[kind]:
+                    row["parameter_bonus_10000"] = 0
+            normal = self.fixed_power(self.model(), False)
+            with patch.object(p.eb, "calculate_deck_bonuses", return_value=bonuses):
+                expected = self.fixed_power(self.model(), True)
+            self.assertEqual(normal, expected)
 
     def test_fast_power_matches_detailed_calculator_in_both_modes(self):
         model = self.model()
         for challenge in (False, True, False):
-            for song in (100081, 100104, 100114):
+            for song in (100005, 100029, 100115, 100118):
                 for leader in (55, 59, 68):
                     for snaps in (self.sids, list(reversed(self.sids))):
                         with self.subTest(challenge=challenge, song=song, leader=leader, snaps=snaps):
@@ -91,7 +97,7 @@ class PowerModeTests(unittest.TestCase):
         request = {"profile": deepcopy(self.profile), "candidate_member_ids": self.mids,
                    "candidate_snap_ids": self.sids, "settings": {
                        "boost_budget": 20, "boost_per_live": 4, "starting_cp": 200, "challenge_cp": 200,
-                       **{mode: {"method": "skip", "sheets": [{"song_id": 100114, "difficulty": "expert"}]}
+                       **{mode: {"method": "skip", "sheets": [{"song_id": 100115, "difficulty": "expert"}]}
                           for mode in ("normal", "challenge")}}}
         for solver in (False, True):
             with self.subTest(solver=solver), patch.object(solver_search, "should_use_solver", return_value=solver):

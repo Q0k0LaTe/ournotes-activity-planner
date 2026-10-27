@@ -21,7 +21,7 @@ import planner_core as p
 import solver_search as upstream_solver
 from ortools.sat.python import cp_model
 
-VERSION = '0.3.2'
+VERSION = '0.3.5'
 SCHEMA = 1
 BDON = 'https://bdon.moe/tools/chart-data'
 KINDS = {
@@ -205,6 +205,10 @@ def skill_area(slot):
         duration = math.ceil(p.cp._float32(p.cp._float32(effect['activation_ms'])
                                          + p.cp._float32(slot['extension_ms'])))
         total += effect['effect_value'] * duration * targets
+    # Song-free potential uses a disclosed ceiling for cumulative support;
+    # actual song estimates count the chart's judgements during each window.
+    for effect in slot.get('active_support_effects', []):
+        total += min(effect['effect_value'] * effect['max_count'], effect['max_effect_value']) * math.ceil(effect['activation_ms'])
     return total
 
 
@@ -239,14 +243,15 @@ def workbench_catalog(data):
             if kind == 'members':
                 live = data.index['MasterLiveSkill'][raw['_liveSkillID']]
                 card['live_skill_name'] = data.text[live['_nameTextID']]
-    catalog['event'] = {'id': data.event_id, 'name': 'Shake Your 魂, Baby!!',
+    catalog['event'] = {'id': data.event_id, 'name': data.text[event['_nameTextId']],
                         'original_name': data.text[event['_nameTextId']],
                         'start_at': event['_startAt'], 'end_at': event['_endAt'],
-                        'snapshot': '2026-10-18', 'rules': list(rules.values()),
+                        'snapshot': '2026-10-27', 'rules': list(rules.values()),
                         'parameter_bonus_applies_to': 'challenge_only'}
     catalog['event_archive'] = []
     for old_id, old_name, snapshot in ((1, '爱的奔流 AtoZ', '2026-10-01'),
-                                       (2, '拜托了，倾心一掷', '2026-10-09')):
+                                       (2, '拜托了，倾心一掷', '2026-10-09'),
+                                       (3, 'Shake Your 魂, Baby!!', '2026-10-18')):
         prior = data.index['MasterEvent'][old_id]
         rewards = p.read_json(data.snapshot / f'normalized/event_{old_id}.json')
         catalog['event_archive'].append({
@@ -323,6 +328,7 @@ def evaluate(raw, data):
                        'algorithm': 'fixed_bindings_direct_evaluation', 'song_count': 0, 'chart_count': 0},
             'assumptions': {'raw_judgement': 'PERFECT', 'assist': False, 'gekisou': False,
                             'each_member_activates_once': True, 'uniform_note_exposure': True,
+                            'cumulative_support_potential': 'full_cap_ceiling',
                             'window_truncation_and_chart_combo': 'not modeled', 'music_tags': 'not included',
                             'fixed_binding_order_is_skill_order': False}}
 
@@ -683,6 +689,7 @@ class Search:
                              'proof_scope': 'each declared proxy among remaining distinct card sets; no actual-song optimum claim'},
                   'assumptions': {'raw_judgement': 'PERFECT', 'assist': False, 'gekisou': False,
                                   'each_member_activates_once': True, 'uniform_note_exposure': True,
+                            'cumulative_support_potential': 'full_cap_ceiling',
                                   'window_truncation_and_chart_combo': 'not modeled',
                                   'music_tags': 'not included',
                                   'formula': 'power * (1 + sum(AP increment * effective milliseconds) / reference milliseconds)',

@@ -17,23 +17,23 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
  try{
   await page.goto(BASE);await ready(page);assert.equal(await page.locator('#ownedCount').textContent(),'0 + 0');
-  assert.match(await page.locator('.page-heading .eyebrow').first().textContent(),/活动 #3/);
+  assert.match(await page.locator('.page-heading .eyebrow').first().textContent(),/活动 #4/);
   await page.locator('[data-tab="archive"]').click();
   assert.match(await page.locator('#eventArchiveList').textContent(),/爱的奔流 AtoZ/);
   assert.match(await page.locator('#eventArchiveList').textContent(),/拜托了，倾心一掷/);
-  assert.equal(await page.locator('#eventArchiveList tbody tr').count(),12);
+  assert.equal(await page.locator('#eventArchiveList tbody tr').count(),18);
   await page.locator('[data-tab="inventory"]').click();
   for(const kind of ['members','snaps']){
     await page.locator(`[data-kind-tab="${kind}"]`).click();
     assert.equal(await page.locator('#cardStatus').inputValue(),'all');
-    assert.equal(await page.locator('#catalogCount').textContent(),kind==='members'?'显示 70 / 70 张卡牌':'显示 73 / 73 张卡牌');
-    const newImage = kind==='members' ? 'members-68.webp' : 'snaps-71.webp';
+    assert.equal(await page.locator('#catalogCount').textContent(),kind==='members'?'显示 74 / 74 张卡牌':'显示 77 / 77 张卡牌');
+    const newImage = kind==='members' ? 'members-72.webp' : 'snaps-75.webp';
     await page.locator(`#cardCatalog img[src*="${newImage}"]`).evaluate(img=>img.loading='eager');
     await page.waitForFunction(name=>{
       const img=document.querySelector(`#cardCatalog img[src*="${name}"]`);
       return img?.complete&&img.naturalWidth>0;
     },newImage);
-    for(const [rarity,count] of [['2',25],['3',28]]){
+    for(const [rarity,count] of [['2',25],['3',29]]){
       await page.locator('#cardRarity').selectOption(rarity);
       assert.equal(await page.locator('#cardCatalog article').count(),count);
       if(kind==='members'&&rarity==='3')for(const id of [27,28,30,33])
@@ -75,7 +75,7 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.locator('[data-tab="inventory"]').click();
   await page.locator('[data-kind-tab="members"]').click();
   assert.equal(await page.locator('#cardStatus').inputValue(),'all');
-  assert.equal(await page.locator('#catalogCount').textContent(),'显示 70 / 70 张卡牌');
+  assert.equal(await page.locator('#catalogCount').textContent(),'显示 74 / 74 张卡牌');
   for(const id of [27,28,30,33])
     assert.equal(await page.locator(`#cardCatalog [data-edit="members"][data-id="${id}"]`).count(),1);
   await page.locator('[data-tab="plan"]').click();
@@ -109,7 +109,7 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.locator('#calculate').click();await complete(page);const first=await exported(page,'workbench-first');
   assert.equal(first.result.teams.length,15);assert.equal(first.result.search.chart_count,0);
   assert.equal(new Set(first.result.teams.map(t=>JSON.stringify([t.member_ids,[...t.snap_ids].sort((a,b)=>a-b)]))).size,15);
-  for (const [songId,mode] of [[100113,'normal'],[100114,'challenge']]) {
+  for (const [songId,mode] of [[100102,'normal'],[100115,'challenge']]) {
     const simulated=await page.evaluate(async ({input,team,song_id,mode})=>window.Planner.request('/api/simulate-song',{
       body:JSON.stringify({input,team,song_id,mode,difficulty:'expert',method:'ap',consumed:mode==='challenge'?200:4})
     }),{input:first.input,team:first.result.teams[0],song_id:songId,mode});
@@ -119,6 +119,18 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   reports.push('unrelated level-0 facility does not block a valid card-pool search');
   reports.push('15 distinct skill-aware teams without songs');console.log(reports.at(-1));
   reports.push('both new charts calculate in the browser runtime');
+  const halloweenFixtures=JSON.parse(fs.readFileSync(path.join(DEST,'halloween-native.json'),'utf8'));
+  const halloweenTeam=(await job(page,halloweenFixtures[0].input.input)).teams[0];
+  assert.equal(halloweenTeam.power,halloweenFixtures[0].input.team.power);
+  assert.equal(halloweenTeam.skill_area_raw,halloweenFixtures[0].input.team.skill_area_raw);
+  for (const fixture of halloweenFixtures) {
+    const actual=await page.evaluate(raw=>window.Planner.request('/api/simulate-song',
+      {body:JSON.stringify(raw)}),fixture.input);
+    assert.deepEqual(actual.score,fixture.expected.score);
+    assert.equal(actual.power,fixture.expected.power);
+    assert.deepEqual(actual.per_live,fixture.expected.per_live);
+  }
+  reports.push('Halloween release, conversion and cumulative skills match native song scores');
   await page.locator('#resultToPlan').click();
   assert.equal(await page.locator('#eventPlan').isVisible(),true);
   assert.equal(await page.locator('#planNormalTeam option').count(),15);
@@ -185,7 +197,7 @@ async function waitJob(page,id,predicate,timeout=120000){const end=Date.now()+ti
   await page.evaluate(id=>window.Planner.request('/api/jobs/'+id+'/cancel',{body:'{}'}),id);
   await waitJob(page,id,j=>j.status!=='running',30000);
   const resumed=await job(page,resume);assert.equal(resumed.teams.length,15);assert.ok(resumed.search.cached_teams>=1);
-  reports.push('infeasible floor, full 70/73 pool cancellation, saved-row resume');console.log(reports.at(-1));
+  reports.push('infeasible floor, full 74/77 pool cancellation, saved-row resume');console.log(reports.at(-1));
   const second=await context.newPage();await second.goto(BASE);await ready(second);await page.locator('[data-tab="archive"]').click();await page.locator('#archiveName').fill('最新档案');await page.locator('#archiveName').dispatchEvent('change');await second.waitForFunction(()=>document.getElementById('inputArea').disabled);assert.ok((await second.locator('#message').textContent()).includes('另一标签页'));await second.close();
   const migration=await browser.newContext();await migration.addInitScript(({input,scope})=>{if(!localStorage.getItem('migration-seeded')){localStorage.setItem('ournotes-browser-planner-v1-profile:'+scope,JSON.stringify(input));localStorage.setItem('migration-seeded','yes');}},{input:native.input,scope:new URL(BASE).pathname});const old=await migration.newPage();await old.goto(BASE);await ready(old);assert.equal(await old.locator('#ownedCount').textContent(),'6 + 10');await old.locator('[data-tab="archive"]').click();await old.locator('#copyProfile').click();assert.equal(await old.locator('#profileSelect option').count(),2);await migration.close();
   reports.push('cross-tab protection, old library migration and separate planning profile');

@@ -87,7 +87,7 @@ def _preview(snapshot_dir: Path, event_id: int, rank: str, consumed: int,
         "validation": {
             "status": "bdon_linked_client_model_preview",
             "source": MODEL_URL + "#L315",
-            "scope": "Exact raw reward bases and bonus integers with client-reference arithmetic. Event 2 has not been independently calibrated against server receipts. Rank is supplied by the caller; this preview does not predict it.",
+            "scope": "Exact raw reward bases and bonus integers with client-reference arithmetic. Event 4 has not been independently calibrated against server receipts. Rank is supplied by the caller; this preview does not predict it.",
             "predicts_score_or_rank": False,
             "checks_owned_deck_or_cp_balance": False,
         },
@@ -96,13 +96,13 @@ def _preview(snapshot_dir: Path, event_id: int, rank: str, consumed: int,
 
 def preview_normal_rewards(snapshot_dir: Path, rank: str, boost: int,
                            event_pt_bonus_10000: int, shop_pt_bonus_10000: int,
-                           event_id: int = 3, *, _context=None) -> dict:
+                           event_id: int = 4, *, _context=None) -> dict:
     return _preview(snapshot_dir, event_id, rank, boost, event_pt_bonus_10000, shop_pt_bonus_10000, False, _context)
 
 
 def preview_challenge_rewards(snapshot_dir: Path, rank: str, cp_consumed: int,
                               event_pt_bonus_10000: int, shop_pt_bonus_10000: int,
-                              event_id: int = 3, *, _context=None) -> dict:
+                              event_id: int = 4, *, _context=None) -> dict:
     return _preview(snapshot_dir, event_id, rank, cp_consumed, event_pt_bonus_10000, shop_pt_bonus_10000, True, _context)
 
 

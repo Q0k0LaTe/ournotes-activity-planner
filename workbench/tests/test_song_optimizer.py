@@ -17,7 +17,7 @@ class SongOptimizerTests(unittest.TestCase):
         value = sample(self.data)
         value['candidate_member_ids'] = value['candidate_member_ids'][:5]
         value['candidate_snap_ids'] = value['candidate_snap_ids'][:snaps]
-        return {'input': value, 'mode': mode, 'song_id': 100114,
+        return {'input': value, 'mode': mode, 'song_id': 100115,
                 'difficulty': 'expert', 'method': method,
                 'consumed': 200 if mode == 'challenge' else 4}
 
@@ -27,9 +27,9 @@ class SongOptimizerTests(unittest.TestCase):
         mids = sorted(raw['input']['candidate_member_ids'])
         sids = raw['input']['candidate_snap_ids']
         model = p.PowerModel(self.data, raw['input']['profile'], mids, sids)
-        model.music(100114, False)
+        model.music(100115, False)
         leader, vectors = model.best_leader(mids)
-        scorer = p.Scores(self.data, {'song_id': 100114, 'difficulty': 'expert', 'method': 'ap'}, False)
+        scorer = p.Scores(self.data, {'song_id': 100115, 'difficulty': 'expert', 'method': 'ap'}, False)
         gold = 0
         for binding in itertools.permutations(sids):
             power = model.total(mids, binding, vectors)
@@ -60,9 +60,9 @@ class SongOptimizerTests(unittest.TestCase):
         mids = sorted(raw['input']['candidate_member_ids'])
         sids = raw['input']['candidate_snap_ids']
         model = p.PowerModel(self.data, raw['input']['profile'], mids, sids)
-        model.music(100114, False)
+        model.music(100115, False)
         leader, vectors = model.best_leader(mids)
-        scorer = p.Scores(self.data, {'song_id': 100114, 'difficulty': 'expert', 'method': 'skip'}, False)
+        scorer = p.Scores(self.data, {'song_id': 100115, 'difficulty': 'expert', 'method': 'skip'}, False)
         bases = {r['rank']: r for r in self.data.event['ordinary_base_rewards']}
         expected = {'event_pt': None, 'shop_pt': None}
         for selected in itertools.combinations(sids, 5):
@@ -93,9 +93,9 @@ class SongOptimizerTests(unittest.TestCase):
         mids = sorted(raw['input']['candidate_member_ids'])
         sids = raw['input']['candidate_snap_ids']
         model = p.PowerModel(self.data, raw['input']['profile'], mids, sids)
-        model.music(100114, True)
+        model.music(100115, True)
         _, vectors = model.best_leader(mids)
-        scorer = p.Scores(self.data, {'song_id': 100114, 'difficulty': 'expert', 'method': 'ap'}, True)
+        scorer = p.Scores(self.data, {'song_id': 100115, 'difficulty': 'expert', 'method': 'ap'}, True)
         bases = {r['rank']: r['event_pt_base'] for r in self.data.event['challenge_base_rewards']}
         gold = None
         for binding in itertools.permutations(sids):
@@ -116,7 +116,7 @@ class SongOptimizerTests(unittest.TestCase):
         base['profile']['inventory']['members'] = [row for row in base['profile']['inventory']['members']
                                                    if row['id'] != 3]
         results = []
-        for mid, level in ((63, 1), (70, 40)):
+        for mid, level in ((63, 1), (73, 40)):
             request = {**base, 'candidate_member_ids': [59, 11, 55, 26, mid]}
             request['profile'] = {**base['profile'], 'inventory': {**base['profile']['inventory'],
                 'members': base['profile']['inventory']['members'] +
@@ -130,7 +130,7 @@ class SongOptimizerTests(unittest.TestCase):
         self.assertLess(lower_bonus['bonuses_10000']['event_pt'], higher_bonus['bonuses_10000']['event_pt'])
         self.assertEqual((lower_bonus['score']['theoretical_rank'], higher_bonus['score']['theoretical_rank']), ('D', 'C'))
         self.assertEqual((lower_bonus['score']['rank'], higher_bonus['score']['rank']), ('C', 'C'))
-        self.assertEqual((lower_bonus['per_live']['event_pt'], higher_bonus['per_live']['event_pt']), (500, 725))
+        self.assertEqual((lower_bonus['per_live']['event_pt'], higher_bonus['per_live']['event_pt']), (1050, 1300))
 
     def test_challenge_skip_and_skip_score_search_are_rejected(self):
         request = self.request(5, 'skip', 'challenge')

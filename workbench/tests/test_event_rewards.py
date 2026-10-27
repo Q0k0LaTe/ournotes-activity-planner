@@ -1,4 +1,4 @@
-"""Cross-check event #3 rewards against pinned raw Master rows."""
+"""Cross-check event #4 rewards against pinned raw Master rows."""
 import unittest
 
 import planner_core as p
@@ -14,7 +14,7 @@ class EventRewardTests(unittest.TestCase):
         ordinary_badges = dict(zip(p.RANKS, (18, 30, 42, 60, 90, 120)))
         ordinary_cp = dict(zip(p.RANKS, (3, 4, 5, 6, 8, 10)))
         challenge_pt = dict(zip(p.RANKS, (1500, 2000, 2750, 3500, 4500, 5500)))
-        challenge_badges = dict(zip(p.RANKS, (2150, 2650, 3400, 4150, 4900, 5650)))
+        challenge_badges = dict(zip(p.RANKS, (2150, 2650, 3400, 4100, 5100, 6400)))
         for challenge in (False, True):
             bases = self.data.event['challenge_base_rewards' if challenge else 'ordinary_base_rewards']
             for base in bases:
@@ -39,7 +39,7 @@ class EventRewardTests(unittest.TestCase):
 
     def test_raw_effect_rows_separate_member_pt_and_snap_badge_bonuses(self):
         rows = [row for row in self.data.tables['MasterEventEffect'] if row['_eventId'] == self.data.event_id]
-        self.assertEqual(len(rows), 20)
+        self.assertEqual(len(rows), 32)
         self.assertEqual({row['_resourceTypeConstraint'] for row in rows if row['_eventBonusType'] == 0}, {2})
         self.assertEqual({row['_resourceTypeConstraint'] for row in rows if row['_eventBonusType'] == 1}, {3})
         self.assertEqual({row['_resourceTypeConstraint'] for row in rows if row['_eventBonusType'] == 2}, {2, 3})
@@ -53,10 +53,10 @@ class EventRewardTests(unittest.TestCase):
         self.assertEqual(second['event_pt'], first['event_pt'])
         self.assertEqual(second['shop_pt'], 600)
 
-    def test_event_3_sr_milestones_match_pinned_master(self):
+    def test_event_4_sr_milestones_match_pinned_master(self):
         rows = p.read_json(self.data.snapshot / 'raw/MasterEventAchievementReward.json')['_allData']
         milestones = [row['_eventPoint'] for row in rows
-                      if row['_eventId'] == 3 and row['_rewardIds'] == [252]]
+                      if row['_eventId'] == 4 and row['_rewardIds'] == [273]]
         self.assertEqual(milestones, [75000, 125000, 200000, 300000, 525000])
 
 

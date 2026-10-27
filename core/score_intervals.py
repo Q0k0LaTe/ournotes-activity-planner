@@ -14,8 +14,7 @@ def note_index(chart):
 
 
 def signature(chart, slots, order, index):
-    commands = ms.factor_commands(chart["skill_time_ms"], slots, order,
-                                  chart["music_length_ms"], channels=True)
+    commands = ms.chart_time_commands(chart, slots, order)
     positions = [0] * len(index)
     counts = Counter()
     note, perfect = ms.f32(1), ms.f32(0)
