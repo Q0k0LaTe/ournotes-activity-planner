@@ -5,6 +5,8 @@ const clone = value => JSON.parse(JSON.stringify(value));
 const fmt = value => Number(value).toLocaleString('zh-CN',{maximumFractionDigits:2});
 const types = {1:'紅赤 · 红',2:'紺碧 · 蓝',3:'翡翠 · 绿',4:'山吹 · 黄',5:'紫苑 · 紫'};
 const typeShort = {1:'紅赤',2:'紺碧',3:'翡翠',4:'山吹',5:'紫苑'};
+const musicTypes = {...types,99:'ALL · 全属性'};
+const musicTypeShort = {...typeShort,99:'ALL 全属性'};
 const rarity = {2:'R',3:'SR',4:'SSR',10:'EX',20:'生日'};
 const fields = {level:'等级',training_count:'特训阶段',awakening_count:'觉醒次数',live_skill_level:'Live 技能等级',limit_break_count:'突破次数'};
 const titles = {plan:'活动配队',inventory:'我的卡牌',growth:'道具与角色',output:'计算结果',song:'歌曲模拟',eventPlan:'活动拉表',archive:'档案与说明'};
@@ -166,6 +168,10 @@ function renderControls(){
   $('pureType').checked=state.team_settings.pure_type;renderGoal();overview();renderLocks();renderFixed();
 }
 function renderGoal(){
+  const attributes=catalog.event.challenge_music_attributes||[],automatic=state.team_settings.mode==='challenge'&&attributes.length===1;
+  $('powerAttribute').value=automatic?attributes[0]:state.team_settings.music_attribute;
+  $('powerAttribute').disabled=automatic;
+  $('powerAttributeHint').textContent=automatic?`本期挑战曲统一采用 ${musicTypes[attributes[0]]}，已自动应用歌曲属性加成；得意乐曲标签请在歌曲模拟中计算。`:'按所选歌曲属性估算综合力；得意乐曲标签请在歌曲模拟中计算。';
   const fixed=state.operation==='evaluate',goal=fixed?'fixed':state.team_settings.strategy;
   document.querySelectorAll('[data-goal]').forEach(b=>{b.classList.toggle('active',b.dataset.goal===goal);b.setAttribute('aria-pressed',String(b.dataset.goal===goal));});
   $('recommendControls').hidden=fixed;$('fixedControls').hidden=!fixed;$('countLabel').hidden=fixed;$('advancedGoals').hidden=fixed;
@@ -360,7 +366,7 @@ function skillText(slot){
   return live.join('；');
 }
 function teamText(team,index){
-  const settings=result.settings,lines=[`Our Notes 配队 ${index+1} · ${team.reason}`,`档案：${resultInput.name}${resultInput.profile_kind==='plan'?'（升级规划）':resultInput.is_demo?'（合成示例）':''}`,`模式：${settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`}`,`综合力场景：${settings.music_attribute?types[settings.music_attribute]+'属性匹配，不含标签':'基础综合力，不含乐曲属性/标签'}`,`综合力：${team.power}`,`活动 PT 加成：${team.bonuses_10000.event_pt/100}%；活动徽章加成：${team.bonuses_10000.shop_pt/100}%`, ''];
+  const settings=result.settings,lines=[`Our Notes 配队 ${index+1} · ${team.reason}`,`档案：${resultInput.name}${resultInput.profile_kind==='plan'?'（升级规划）':resultInput.is_demo?'（合成示例）':''}`,`模式：${settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`}`,`综合力场景：${settings.music_attribute?musicTypes[settings.music_attribute]+'属性匹配，不含标签':'基础综合力，不含乐曲属性/标签'}`,`综合力：${team.power}`,`活动 PT 加成：${team.bonuses_10000.event_pt/100}%；活动徽章加成：${team.bonuses_10000.shop_pt/100}%`, ''];
   team.slots.forEach((slot,i)=>{const m=card('members',slot.member_id),s=card('snaps',slot.snap_id),mr=resultInput.profile.inventory.members.find(r=>r.id===m.id),sr=resultInput.profile.inventory.snaps.find(r=>r.id===s.id);lines.push(`${i+1}. 成员 #${m.id} ${m.title} / ${m.name}${m.id===team.leader_id?' [队长]':''}`,`   Lv.${mr.level}；特训 ${mr.training_count+1} 阶；觉醒 ${mr.awakening_count}；Live Lv.${slot.live_skill_level}：${skillText(slot)}`,`   Snap #${s.id} ${s.title} / ${s.name}；Lv.${sr.level}；突破 ${sr.limit_break_count}；延长 ${slot.extension_ms/1000} 秒`);});
   lines.push('','显示位置用于成员与留影绑定，不代表技能触发顺序。', '在 bdon 按成员、留影和实际综合力设置重放。潜力指数不作为谱面分数。',`数据快照 ${catalog.event.snapshot} · 活动 #${catalog.event.id} · AP/PERFECT · 撃奏关闭`,result.bdon_url);return lines.join('\n');
 }
@@ -369,7 +375,7 @@ function resultCategory(team){return ['short','skill'].includes(team.selected_fo
 function renderResult(go=true){
   $('emptyResult').hidden=true;$('results').hidden=false;$('resultCount').textContent=result.teams.length+' 套';
   $('resultTitle').textContent=result.status==='complete_fixed_team'?'指定队伍验算完成':`找到 ${result.teams.length} 套不同配队`;
-  $('resultHint').textContent=`${resultInput.name} · ${result.settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`} · ${result.settings.music_attribute?types[result.settings.music_attribute]+'匹配场景':'基础综合力场景'} · ${result.search.elapsed_seconds} 秒${result.search.cached_teams?' · 复用 '+result.search.cached_teams+' 套':''}${result.search.exhausted?' · 当前条件下没有更多卡组':''}`;
+  $('resultHint').textContent=`${resultInput.name} · ${result.settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`} · ${result.settings.music_attribute?musicTypes[result.settings.music_attribute]+'匹配场景':'基础综合力场景'} · ${result.search.elapsed_seconds} 秒${result.search.cached_teams?' · 复用 '+result.search.cached_teams+' 套':''}${result.search.exhausted?' · 当前条件下没有更多卡组':''}`;
   resultFilter='all';$('resultSort').value='recommended';renderTeamList();renderComparison();if(go){tab('output');window.scrollTo({top:0,behavior:'smooth'});}
   window.EventPages?.onResult();
 }
@@ -403,7 +409,7 @@ async function saveTeamImage(){
   try{
     const t=result.teams[detailIndex],canvas=document.createElement('canvas');canvas.width=1500;canvas.height=1010;const ctx=canvas.getContext('2d');
     ctx.fillStyle='#faf7fd';ctx.fillRect(0,0,1500,1010);ctx.fillStyle='#302b3c';ctx.font='bold 36px Microsoft YaHei';ctx.fillText('Our Notes · 队伍 '+(detailIndex+1)+' / '+t.reason,55,73);
-    ctx.font='21px Microsoft YaHei';ctx.fillStyle='#83728f';ctx.fillText(resultInput.name+' · '+(result.settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`)+' · '+(result.settings.music_attribute?typeShort[result.settings.music_attribute]+'属性匹配':'基础综合力'),55,116);
+    ctx.font='21px Microsoft YaHei';ctx.fillStyle='#83728f';ctx.fillText(resultInput.name+' · '+(result.settings.mode==='normal'?'普通单人':`活动 ${catalog.event.id} 挑战`)+' · '+(result.settings.music_attribute?musicTypeShort[result.settings.music_attribute]+'属性匹配':'基础综合力'),55,116);
     ctx.fillStyle='#83539b';ctx.font='bold 30px Microsoft YaHei';ctx.fillText('综合力 '+fmt(t.power)+'     活动 PT +'+fmt(t.bonuses_10000.event_pt/100)+'%     徽章 +'+fmt(t.bonuses_10000.shop_pt/100)+'%',55,170);
     const load=src=>new Promise((resolve,reject)=>{const img=new Image();let attempts=0;img.onload=()=>resolve(img);img.onerror=()=>{if(attempts>=2){reject(new Error('卡图加载失败，请重试'));return;}img.src=imageRetryUrl(src,++attempts);};img.src=src;});
     const images=await Promise.all(t.slots.flatMap(slot=>[load(card('members',slot.member_id).thumbnail),load(card('snaps',slot.snap_id).thumbnail)]));
@@ -445,7 +451,7 @@ async function init(){
   try{
     const response=await fetch('/api/bootstrap'),value=await response.json();if(!response.ok)throw new Error(value.error||'启动失败');
     ({catalog,token,sample,defaults,version}=value);signature=value.engine_signature;cardIndex={members:new Map(catalog.members.map(c=>[c.id,c])),snaps:new Map(catalog.snaps.map(c=>[c.id,c]))};$('version').textContent='v'+version.replace('-local','');
-    for(const id of ['memberType','snapType','cardType','pickerType'])$(id).innerHTML=options(types);$('powerAttribute').innerHTML=options(types,'基础值（无乐曲加成）');
+    for(const id of ['memberType','snapType','cardType','pickerType'])$(id).innerHTML=options(types);$('powerAttribute').innerHTML=options(musicTypes,'基础值（无乐曲加成）');
     const bands=Object.fromEntries(catalog.bands.map(b=>[b.id,b.name]));for(const id of ['memberBand','cardBand'])$(id).innerHTML=options(bands);$('cardCharacter').innerHTML=options(Object.fromEntries(catalog.characters.map(c=>[c.id,c.name])));
     for(const[id,kind]of [['memberRarity','members'],['snapRarity','snaps']])$(id).innerHTML='<option value="0">不限稀有度</option>'+[...new Set(catalog[kind].map(c=>c.rarity))].sort((a,b)=>a-b).map(r=>`<option value="${r}">${esc(rarity[r]||r)} 及以上</option>`).join('');
     $('cardRarity').innerHTML=options(Object.fromEntries([...new Set([...catalog.members,...catalog.snaps].map(c=>c.rarity))].sort((a,b)=>a-b).map(r=>[r,rarity[r]||r])));

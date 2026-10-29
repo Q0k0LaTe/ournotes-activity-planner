@@ -21,7 +21,7 @@ import planner_core as p
 import solver_search as upstream_solver
 from ortools.sat.python import cp_model
 
-VERSION = '0.3.5'
+VERSION = '0.3.6'
 SCHEMA = 1
 BDON = 'https://bdon.moe/tools/chart-data'
 KINDS = {
@@ -59,6 +59,12 @@ def card_allowed(data, card, kind, settings):
     return True
 
 
+def challenge_music_attributes(data):
+    """Effective song types for the current event, including ALL (99)."""
+    return sorted({row['_musicType'] or data.index['MasterLiveMusic'][row['_liveMusicId']]['_musicType']
+                   for row in data.tables['MasterChallengeMusic'] if row['_eventId'] == data.event_id})
+
+
 def parse_request(raw, data):
     if not isinstance(raw, dict):
         raise p.InputError('请导入有效的个人卡库。')
@@ -70,9 +76,14 @@ def parse_request(raw, data):
         raise p.InputError('请选择普通或挑战配队。')
     if settings['strategy'] not in ('portfolio', *KINDS):
         raise p.InputError('推荐类型不正确。')
-    for name, high in (('count', 15), ('member_type', 5), ('snap_type', 5),
-                       ('music_attribute', 5), ('member_band', 100)):
+    for name, high in (('count', 15), ('member_type', 5), ('snap_type', 5), ('member_band', 100)):
         p.integer(settings[name], name, 1 if name == 'count' else 0, high)
+    if type(settings['music_attribute']) is not int or settings['music_attribute'] not in (0, 1, 2, 3, 4, 5, 99):
+        raise p.InputError('歌曲属性请选择基础值、五种单色或 ALL 全属性。')
+    attributes = challenge_music_attributes(data)
+    if settings['mode'] == 'challenge' and len(attributes) == 1:
+        # Old saved scenarios must not override the event's actual song type.
+        settings['music_attribute'] = attributes[0]
     if type(settings['pure_type']) is not bool:
         raise p.InputError('纯属性条件格式不正确。')
     for key in ('member_min_rarity', 'snap_min_rarity'):
@@ -191,7 +202,7 @@ def set_power_context(model, settings):
         card, rank, b = model.cards[mid], model.rank[mid], model.b[mid]
         typ = model.music_type
         type_rate = (model.type_base + rank['_musicTypeBonusRate']) if (
-            typ and (card['_cardType'] == 99 or card['_cardType'] == typ)) else 0
+            typ and (typ == 99 or card['_cardType'] == 99 or card['_cardType'] == typ)) else 0
         model.static[mid] = p.dp._add(
             model.base[mid], model.flat[mid], p.dp._mul_floor(b, model.band[mid]),
             p.dp._mul_floor(b, (type_rate,) * 3), p.dp._mul_floor(b, (model.vip,) * 3))
@@ -247,6 +258,7 @@ def workbench_catalog(data):
                         'original_name': data.text[event['_nameTextId']],
                         'start_at': event['_startAt'], 'end_at': event['_endAt'],
                         'snapshot': '2026-10-27', 'rules': list(rules.values()),
+                        'challenge_music_attributes': challenge_music_attributes(data),
                         'parameter_bonus_applies_to': 'challenge_only'}
     catalog['event_archive'] = []
     for old_id, old_name, snapshot in ((1, '爱的奔流 AtoZ', '2026-10-01'),
@@ -304,6 +316,7 @@ def evaluate(raw, data):
                'min_event_bonus_10000': 0, 'min_shop_bonus_10000': 0}
     request = parse_request({**source, 'candidate_member_ids': mids,
                              'candidate_snap_ids': binding, 'team_settings': context}, data)
+    context = request['team_settings']
     leader = fixed.get('leader_id', 0)
     if type(leader) is not int or (leader and leader not in mids):
         raise p.InputError('队长必须是指定队伍中的成员，或选择自动比较队长。')

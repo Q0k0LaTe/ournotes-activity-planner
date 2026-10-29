@@ -45,3 +45,10 @@ if __name__ == '__main__':
                'difficulty': 'expert', 'method': 'ap', 'consumed': 200 if mode == 'challenge' else 4}
         cases.append({'input': raw, 'expected': simulation.simulate(raw, data)})
     (dest / 'halloween-native.json').write_text(json.dumps(cases, ensure_ascii=False), 'utf-8')
+    # Legacy challenge settings are normalized to this event's ALL attribute.
+    halloween['team_settings'].update(mode='challenge', music_attribute=2)
+    fixed = t.evaluate(halloween, data)
+    assert fixed['settings']['music_attribute'] == 99
+    assert fixed['teams'][0]['power'] == 633607
+    (dest / 'all-attribute-native.json').write_text(json.dumps(
+        {'input': halloween, 'expected': fixed}, ensure_ascii=False), 'utf-8')
